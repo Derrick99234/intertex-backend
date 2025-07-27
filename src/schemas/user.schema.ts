@@ -3,34 +3,34 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
-  @Prop({ required: true, unique: true })
+  @Prop()
   firstName: string;
 
-  @Prop({ required: true })
+  @Prop()
   lastName: string;
 
-  @Prop({ required: true })
+  @Prop()
   dob: string;
 
-  @Prop({ required: true })
+  @Prop()
   gender: string;
 
-  @Prop({ required: true })
+  @Prop()
   email: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
 
-  @Prop({ required: true })
+  @Prop()
   countryOfResidence: string;
 
-  @Prop({ required: true })
+  @Prop()
   phone: string;
 
-  @Prop({ required: true })
+  @Prop()
   city: string;
 
-  @Prop({ required: true })
+  @Prop()
   streetAddress: string;
 
   @Prop({ default: false })
