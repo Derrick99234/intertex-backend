@@ -1,7 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    transform(doc, ret) {
+      if ('password' in ret) {
+        delete ret.password;
+      }
+      return ret;
+    },
+  },
+})
 export class User extends Document {
   @Prop()
   fullName: string;

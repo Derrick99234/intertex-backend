@@ -30,11 +30,7 @@ export class UserService {
       password: hashedPassword,
     });
 
-    const savedUser = await newUser.save();
-    const userObj = savedUser.toObject();
-    delete userObj.password;
-
-    return userObj;
+    return newUser.save();
   }
 
   async findAll(): Promise<User[]> {
