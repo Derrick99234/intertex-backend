@@ -2,10 +2,7 @@ import { IsBoolean, IsEmail, IsString, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
-  firstName: string;
-
-  @IsString()
-  lastName: string;
+  fullName: string;
 
   @IsString()
   dob: string;

@@ -4,10 +4,7 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop()
-  firstName: string;
-
-  @Prop()
-  lastName: string;
+  fullName: string;
 
   @Prop()
   dob: string;

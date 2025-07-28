@@ -16,12 +16,10 @@ type AuthInput = {
 
 type SignInPayload = {
   userId: string;
-  username: string;
 };
 
 type AuthResult = {
   accessToken: string;
-  username: string;
   userId: string;
 };
 
@@ -57,14 +55,12 @@ export class AuthService {
 
     return {
       userId: user._id.toString(),
-      username: user.firstName, // Or use email if no username
     };
   }
 
   private async signIn(user: SignInPayload): Promise<AuthResult> {
     const payload = {
       sub: user.userId,
-      username: user.username,
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
@@ -72,7 +68,6 @@ export class AuthService {
     return {
       accessToken,
       userId: user.userId,
-      username: user.username,
     };
   }
 }

@@ -15,7 +15,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<Partial<User>> {
-    const { email, password } = createUserDto;
+    const { fullName, email, password } = createUserDto;
 
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
@@ -26,6 +26,7 @@ export class UserService {
 
     const newUser = new this.userModel({
       email,
+      fullName,
       password: hashedPassword,
     });
 
