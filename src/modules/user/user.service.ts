@@ -14,7 +14,7 @@ import { Model } from 'mongoose';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<Partial<User>> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { fullName, email, password } = createUserDto;
 
     const existingUser = await this.userModel.findOne({ email });
