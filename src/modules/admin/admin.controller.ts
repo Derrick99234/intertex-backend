@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { UserService } from '../user/user.service';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
+import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 
 @Controller('admin')
 export class AdminController {
@@ -20,5 +21,18 @@ export class AdminController {
   @Get('users')
   async getAllUsers() {
     return this.userService.findAll();
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('get-admin')
+  getAdmin(@AuthUser() authUser: any) {
+    const { userId } = authUser;
+    return this.adminService.findOne(userId);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('get-admin-by-id')
+  getAdminById(@Body() { id }: { id: string }) {
+    return this.adminService.findOne(id);
   }
 }

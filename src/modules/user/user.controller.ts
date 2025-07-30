@@ -19,7 +19,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get('get-user')
-  getMe(@AuthUser() authUser: any) {
+  getUser(@AuthUser() authUser: any) {
     const { userId } = authUser;
     return this.userService.findOne(userId);
   }
