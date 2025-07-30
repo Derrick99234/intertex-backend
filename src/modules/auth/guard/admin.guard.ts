@@ -29,10 +29,6 @@ export class AdminAuthGuard implements CanActivate {
         role: tokenPayload.role,
       };
 
-      if (tokenPayload.role !== 'admin') {
-        throw new ForbiddenException('Access denied: Admins only');
-      }
-
       return true;
     } catch (error) {
       if (
