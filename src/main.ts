@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { AdminService } from './modules/admin/admin.service';
+import { UserService } from './modules/user/user.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,9 @@ async function bootstrap() {
 
   // const adminService = app.get(AdminService);
   // await adminService.createSuperAdmin();
+
+  // const userService = app.get(UserService);
+  // await userService.generateFakeUsers(100);
 
   await app.listen(process.env.PORT ?? 2025);
 }
