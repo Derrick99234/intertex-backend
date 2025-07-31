@@ -1,8 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
 import { AdminRoles } from 'src/common/utils/enums.utils';
-
-export type AdminDocument = Admin & Document;
 
 @Schema({ timestamps: true })
 export class Admin {

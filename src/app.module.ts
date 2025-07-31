@@ -7,6 +7,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { envConfig } from './configs/env.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminModule } from './modules/admin/admin.module';
+import { CategoryModule } from './modules/category/category.module';
+import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { AdminModule } from './modules/admin/admin.module';
     AuthModule,
     UserModule,
     AdminModule,
+    CategoryModule,
+    SubcategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
