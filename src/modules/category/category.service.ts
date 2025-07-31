@@ -48,11 +48,11 @@ export class CategoryService {
     return updated;
   }
 
-  async remove(id: string): Promise<Category> {
+  async remove(id: string): Promise<{ message: string }> {
     const deleted = await this.categoryModel.findByIdAndDelete(id);
     if (!deleted) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return deleted;
+    return { message: `Category with ID ${id} was successfully deleted.` };
   }
 }

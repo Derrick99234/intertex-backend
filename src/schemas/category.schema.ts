@@ -12,7 +12,7 @@ export class Category {
   @Prop({ type: String, required: true })
   description: string;
 
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, unique: true })
   slug: string;
 
   @Prop({ type: Boolean, required: true, default: true })
