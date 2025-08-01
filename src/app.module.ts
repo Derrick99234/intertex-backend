@@ -10,6 +10,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 import { TypeModule } from './modules/type/type.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { TypeModule } from './modules/type/type.module';
     CategoryModule,
     SubcategoryModule,
     TypeModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],
