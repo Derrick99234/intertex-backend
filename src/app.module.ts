@@ -9,6 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AdminModule } from './modules/admin/admin.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SubcategoryModule } from './modules/subcategory/subcategory.module';
+import { TypeModule } from './modules/type/type.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SubcategoryModule } from './modules/subcategory/subcategory.module';
     AdminModule,
     CategoryModule,
     SubcategoryModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

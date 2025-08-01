@@ -10,7 +10,6 @@ import { CategoryModule } from '../category/category.module';
   imports: [
     MongooseModule.forFeature([
       { name: Subcategory.name, schema: SubcategorySchema },
-      { name: Category.name, schema: CategorySchema },
     ]),
     CategoryModule,
   ],
