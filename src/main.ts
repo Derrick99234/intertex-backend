@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { AdminService } from './modules/admin/admin.service';
 import { UserService } from './modules/user/user.service';
+import { MongooseExceptionFilter } from './common/decorators/mongoose-exception.decorator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +22,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-
+  app.useGlobalFilters(new MongooseExceptionFilter());
   // const adminService = app.get(AdminService);
   // await adminService.createSuperAdmin();
 

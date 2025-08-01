@@ -33,6 +33,12 @@ export class CategoryService {
     id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
+    if (updateCategoryDto.name) {
+      updateCategoryDto.slug = updateCategoryDto.name
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+    }
+
     const updated = await this.categoryModel.findByIdAndUpdate(
       id,
       updateCategoryDto,

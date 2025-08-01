@@ -6,15 +6,18 @@ import { Model } from 'mongoose';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
 import { UpdateSubcategoryDto } from './dto/update-subcategory.dto';
 import { Subcategory } from 'src/schemas/subcategory.schema';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class SubcategoryService {
   constructor(
     @InjectModel(Subcategory.name)
     private readonly subcategoryModel: Model<Subcategory>,
+    private readonly categoryService: CategoryService,
   ) {}
 
   async create(createDto: CreateSubcategoryDto): Promise<Subcategory> {
+    await this.categoryService.findOne(createDto.category);
     const subcategory = new this.subcategoryModel(createDto);
     return subcategory.save();
   }
@@ -40,6 +43,14 @@ export class SubcategoryService {
     id: string,
     updateDto: UpdateSubcategoryDto,
   ): Promise<Subcategory> {
+    if (updateDto.category) {
+      await this.categoryService.findOne(updateDto.category);
+    }
+
+    if (updateDto.name) {
+      updateDto.slug = updateDto.name.toLowerCase().replace(/\s+/g, '-');
+    }
+
     const updated = await this.subcategoryModel
       .findByIdAndUpdate(id, updateDto, { new: true })
       .exec();
