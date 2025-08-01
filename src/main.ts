@@ -29,6 +29,6 @@ async function bootstrap() {
   // const userService = app.get(UserService);
   // await userService.generateFakeUsers(100);
 
-  await app.listen(process.env.PORT ?? 2025);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
