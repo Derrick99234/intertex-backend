@@ -24,6 +24,17 @@ export class TypeService {
     return type.save();
   }
 
+  async createMany(createTypeDtos: CreateTypeDto[]): Promise<ProductType[]> {
+    // validate each subcategory before saving
+    for (const dto of createTypeDtos) {
+      await this.subcategoryService.findOne(dto.subcategory);
+    }
+
+    // bulk insert
+    const docs = await this.typeModel.insertMany(createTypeDtos);
+    return docs.map((doc) => doc.toObject() as ProductType);
+  }
+
   async findAll(): Promise<ProductType[]> {
     return this.typeModel.find().populate('subcategory').exec();
   }

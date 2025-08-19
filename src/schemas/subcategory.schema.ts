@@ -11,7 +11,7 @@ export class Subcategory extends Document {
   @Prop()
   description: string;
 
-  @Prop({ unique: true })
+  @Prop()
   slug: string;
 
   @Prop({ default: true })

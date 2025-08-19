@@ -26,6 +26,16 @@ export class TypeController {
     };
   }
 
+  @Post('bulk')
+  async createMany(@Body() createDtos: CreateTypeDto[]) {
+    const types = await this.typeService.createMany(createDtos);
+    return {
+      message: 'Types created successfully',
+      count: types.length,
+      data: types,
+    };
+  }
+
   @Get()
   async findAll() {
     const types = await this.typeService.findAll();
