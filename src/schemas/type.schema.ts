@@ -10,7 +10,7 @@ export class ProductType extends Document {
   @Prop()
   description: string;
 
-  @Prop({ unique: true })
+  @Prop()
   slug: string;
 
   @Prop({ default: true })

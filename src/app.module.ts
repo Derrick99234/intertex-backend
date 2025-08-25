@@ -11,6 +11,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { SubcategoryModule } from './modules/subcategory/subcategory.module';
 import { TypeModule } from './modules/type/type.module';
 import { ProductModule } from './modules/product/product.module';
+import { BlogPostModule } from './modules/blog/blog.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ProductModule } from './modules/product/product.module';
     SubcategoryModule,
     TypeModule,
     ProductModule,
+    BlogPostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

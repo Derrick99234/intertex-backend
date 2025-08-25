@@ -31,8 +31,12 @@ export class TypeService {
     }
 
     // bulk insert
-    const docs = await this.typeModel.insertMany(createTypeDtos);
-    return docs.map((doc) => doc.toObject() as ProductType);
+    const docs = createTypeDtos.map((dto) => ({
+      ...dto,
+      slug: dto.name.toLowerCase().replace(/\s+/g, '-'),
+    }));
+    const insertedDocs = await this.typeModel.insertMany(docs);
+    return insertedDocs.map((doc) => doc.toObject() as ProductType);
   }
 
   async findAll(): Promise<ProductType[]> {

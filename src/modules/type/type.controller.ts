@@ -71,10 +71,6 @@ export class TypeController {
 
   @Get('/by-subcategory/:subcategoryId')
   async findBySubcategory(@Param('subcategoryId') subcategoryId: string) {
-    const types = await this.typeService.findBySubcategory(subcategoryId);
-    return {
-      message: 'Types under this subcategory fetched successfully',
-      data: types,
-    };
+    return await this.typeService.findBySubcategory(subcategoryId);
   }
 }
