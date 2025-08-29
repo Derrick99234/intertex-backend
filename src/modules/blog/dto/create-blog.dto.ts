@@ -1,17 +1,12 @@
-import { IsString, IsArray, IsOptional } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateBlogPostDto {
   @IsString()
   title: string;
 
-  @IsArray()
-  @IsOptional()
+  @IsString()
   tags?: string[];
 
   @IsString()
   description: string;
-
-  @IsString()
-  @IsOptional()
-  imageCover?: string;
 }

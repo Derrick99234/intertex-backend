@@ -11,8 +11,11 @@ export class BlogPostService {
     @InjectModel(BlogPost.name) private postModel: Model<BlogPostDocument>,
   ) {}
 
-  async create(createPostDto: CreateBlogPostDto): Promise<BlogPost> {
-    const newPost = new this.postModel(createPostDto);
+  async create(
+    createPostDto: CreateBlogPostDto,
+    imageCover: string,
+  ): Promise<BlogPost> {
+    const newPost = new this.postModel({ ...createPostDto, imageCover });
     return newPost.save();
   }
 
@@ -29,9 +32,10 @@ export class BlogPostService {
   async update(
     id: string,
     updatePostDto: UpdateBlogPostDto,
+    imageCover?: string,
   ): Promise<BlogPost> {
     const updatedPost = await this.postModel
-      .findByIdAndUpdate(id, updatePostDto, { new: true })
+      .findByIdAndUpdate(id, { ...updatePostDto, imageCover }, { new: true })
       .exec();
     if (!updatedPost) throw new NotFoundException('Post not found');
     return updatedPost;

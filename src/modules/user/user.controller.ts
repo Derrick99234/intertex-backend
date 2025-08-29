@@ -17,12 +17,18 @@ import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('/:id')
+  getUserByID(@Param('id') userId: string) {
+    return this.userService.findOne(userId);
+  }
+
   @UseGuards(AuthGuard)
   @Get('get-user')
   getUser(@AuthUser() authUser: any) {
     const { userId } = authUser;
     return this.userService.findOne(userId);
   }
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
   //   return this.userService.update(+id, updateUserDto);

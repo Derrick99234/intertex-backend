@@ -4,6 +4,7 @@ import { TypeController } from './type.controller';
 import { SubcategoryModule } from '../subcategory/subcategory.module';
 import { ProductType, ProductTypeSchema } from 'src/schemas/type.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       { name: ProductType.name, schema: ProductTypeSchema },
     ]),
     SubcategoryModule,
+    CategoryModule,
   ],
   controllers: [TypeController],
   providers: [TypeService],

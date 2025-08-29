@@ -9,12 +9,14 @@ import { CreateTypeDto } from './dto/create-type.dto';
 import { UpdateTypeDto } from './dto/update-type.dto';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { ProductType } from 'src/schemas/type.schema';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class TypeService {
   constructor(
     @InjectModel(ProductType.name)
     private readonly typeModel: Model<ProductType>,
+    private readonly categoryService: CategoryService,
     private readonly subcategoryService: SubcategoryService,
   ) {}
 
@@ -98,6 +100,18 @@ export class TypeService {
     }
 
     return { message: 'Type deleted successfully' };
+  }
+
+  async findProductCategory(subcategoryId: string) {
+    const subcategory = await this.subcategoryService.findOne(subcategoryId);
+    const categoryId = subcategory.category;
+    const category = await this.categoryService.findOne(categoryId.toString());
+    return {
+      categoryId: category._id,
+      categoryName: category.name,
+      subcategoryId: subcategory._id,
+      subcategoryName: subcategory.name,
+    };
   }
 
   async findBySubcategory(subcategoryId: string): Promise<ProductType[]> {
