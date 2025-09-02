@@ -32,6 +32,9 @@ export class User extends Document {
   countryOfResidence: string;
 
   @Prop()
+  stateOfResidence: string;
+
+  @Prop()
   phone: string;
 
   @Prop()

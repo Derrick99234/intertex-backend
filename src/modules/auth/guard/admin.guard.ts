@@ -22,11 +22,8 @@ export class AdminAuthGuard implements CanActivate {
 
     try {
       const tokenPayload = await this.jwtService.verifyAsync(token);
-
-      // You can add more user info if needed
       request.user = {
         userId: tokenPayload.sub,
-        role: tokenPayload.role,
       };
 
       return true;
