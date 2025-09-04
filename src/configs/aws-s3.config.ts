@@ -21,7 +21,7 @@ export const awsOption = {
     },
     key: (req, file, cb) => {
       const ext = file.originalname.split('.').pop();
-      cb(null, `products/${uuidv4()}.${ext}`);
+      cb(null, `testing-folder/${uuidv4()}.${ext}`);
     },
   }),
 };

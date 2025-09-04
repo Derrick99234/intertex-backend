@@ -26,16 +26,49 @@ export class ProductService {
       imageUrl,
       otherImages,
     });
-    return await newProduct.save();
+    const product = await newProduct.save();
+
+    const populatedProduct = await product.populate([
+      {
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      },
+      { path: 'productType' },
+    ]);
+
+    return populatedProduct;
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productModel.find().populate('productType');
+    return this.productModel
+      .find()
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType')
+      .sort({ createdAt: -1 });
   }
 
   async findOne(id: string): Promise<Product> {
     const product = await this.productModel
       .findById(id)
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
       .populate('productType');
 
     if (!product) {

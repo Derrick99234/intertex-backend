@@ -66,4 +66,7 @@ export class CreateProductDto {
 
   @IsMongoId()
   productType: string;
+
+  @IsMongoId()
+  subcategory: string;
 }
