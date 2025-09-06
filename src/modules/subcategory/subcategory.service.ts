@@ -26,6 +26,17 @@ export class SubcategoryService {
     return this.subcategoryModel.find().populate('category').exec();
   }
 
+  async findOneBySlug(slug: string): Promise<Subcategory> {
+    const subcategory = await this.subcategoryModel
+      .findOne({ slug })
+      .populate('category')
+      .exec();
+    if (!subcategory) {
+      throw new NotFoundException('Subcategory not found');
+    }
+    return subcategory;
+  }
+
   async findOne(id: string): Promise<Subcategory> {
     const subcategory = await this.subcategoryModel
       .findById(id)

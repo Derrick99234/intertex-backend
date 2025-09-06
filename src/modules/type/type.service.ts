@@ -42,7 +42,24 @@ export class TypeService {
   }
 
   async findAll(): Promise<ProductType[]> {
-    return this.typeModel.find().populate('subcategory').exec();
+    return this.typeModel
+      .find()
+      .populate({
+        path: 'subcategory',
+        populate: { path: 'category', select: 'name slug' },
+      })
+      .exec();
+  }
+
+  async findOneBySlug(slug: string): Promise<ProductType> {
+    const type = await this.typeModel
+      .findOne({ slug })
+      .populate('subcategory')
+      .exec();
+    if (!type) {
+      throw new NotFoundException(`Type with slug ${slug} not found`);
+    }
+    return type;
   }
 
   async findOne(id: string): Promise<ProductType> {

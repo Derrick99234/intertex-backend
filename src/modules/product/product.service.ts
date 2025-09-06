@@ -5,12 +5,16 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { TypeService } from '../type/type.service';
 import { Product } from 'src/schemas/product.schema';
+import { SubcategoryService } from '../subcategory/subcategory.service';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
     private readonly typeService: TypeService,
+    private readonly subcategoryService: SubcategoryService,
+    private readonly categoryService: CategoryService,
   ) {}
 
   async create(
@@ -106,5 +110,95 @@ export class ProductService {
     }
 
     return { message: 'Product deleted successfully' };
+  }
+
+  async searchProducts(keyword: string): Promise<Product[]> {
+    const regex = new RegExp(keyword, 'i'); // Case-insensitive regex for partial match
+    return this.productModel
+      .find({
+        $or: [{ name: regex }, { description: regex }],
+      })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
+  }
+
+  async fetchLatestProducts(limit: number): Promise<Product[]> {
+    return this.productModel
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
+  }
+
+  async fetchProductsByCategory(slug: string): Promise<Product[]> {
+    const category = await this.categoryService.findOneBySlug(slug);
+    const subcategories = await this.subcategoryService.findByCategory(
+      category._id as string,
+    );
+    const subcategoryIds = subcategories.map((sub) => sub._id);
+
+    return this.productModel.find({ subcategory: { $in: subcategoryIds } });
+  }
+
+  async fetchProductsByType(slug: string): Promise<Product[]> {
+    const type = await this.typeService.findOneBySlug(slug);
+    return this.productModel
+      .find({ productType: type._id })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
+  }
+
+  async fetchProductsBySubcategory(
+    categorySlug: string,
+    subcategorySlug: string,
+  ): Promise<Product[]> {
+    const category = await this.categoryService.findOneBySlug(categorySlug);
+    const subcategories = await this.subcategoryService.findByCategory(
+      category._id as string,
+    );
+    const subcategoryIds = subcategories.map((sub) => sub._id.toString());
+
+    const subcategory = subcategories.find(
+      (sub) => sub.slug === subcategorySlug,
+    );
+
+    if (!subcategoryIds.includes(subcategory._id.toString())) {
+      throw new NotFoundException(
+        `Subcategory with slug ${subcategorySlug} not found under category ${categorySlug}`,
+      );
+    }
+    return this.productModel
+      .find({ subcategory: subcategory._id })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
   }
 }

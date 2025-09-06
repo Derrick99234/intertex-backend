@@ -29,6 +29,14 @@ export class CategoryService {
     return category;
   }
 
+  async findOneBySlug(slug: string): Promise<Category> {
+    const category = await this.categoryModel.findOne({ slug }).exec();
+    if (!category) {
+      throw new NotFoundException(`Category with slug ${slug} not found`);
+    }
+    return category;
+  }
+
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,

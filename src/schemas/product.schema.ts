@@ -37,7 +37,7 @@ export class Product extends Document {
   @Prop({ required: true })
   imageUrl: string;
 
-  @Prop()
+  @Prop({ unique: true })
   slug: string;
 
   @Prop({ type: [String], default: [] })

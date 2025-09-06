@@ -123,4 +123,37 @@ export class ProductController {
   async remove(@Param('id') id: string) {
     return await this.productService.remove(id);
   }
+
+  @Get('category/:slug')
+  async fetchProductsByCategory(@Param('slug') slug: string) {
+    const products = await this.productService.fetchProductsByCategory(slug);
+    return {
+      message: 'Products by category retrieved successfully',
+      products,
+    };
+  }
+
+  @Get('type/:id')
+  async fetchProductsByType(@Param('id') slug: string) {
+    const products = await this.productService.fetchProductsByType(slug);
+    return {
+      message: 'Products by type retrieved successfully',
+      products,
+    };
+  }
+
+  @Get('subcategory/:catSlug/:subSlug')
+  async fetchProductsBySubcategory(
+    @Param('catSlug') categoryId: string,
+    @Param('subSlug') subcategoryId: string,
+  ) {
+    const products = await this.productService.fetchProductsBySubcategory(
+      categoryId,
+      subcategoryId,
+    );
+    return {
+      message: 'Products by subcategory retrieved successfully',
+      products,
+    };
+  }
 }
