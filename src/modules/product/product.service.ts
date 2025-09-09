@@ -201,4 +201,18 @@ export class ProductService {
       })
       .populate('productType');
   }
+
+  async fetchProductBySlug(slug: string): Promise<Product | null> {
+    return this.productModel
+      .findOne({ slug })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
+  }
 }

@@ -156,4 +156,13 @@ export class ProductController {
       products,
     };
   }
+
+  @Get('product/:productSlug')
+  async fetchProductBySlug(@Param('productSlug') productSlug: string) {
+    const product = await this.productService.fetchProductBySlug(productSlug);
+    return {
+      message: 'Product retrieved successfully',
+      product,
+    };
+  }
 }
