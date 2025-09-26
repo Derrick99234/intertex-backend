@@ -13,7 +13,7 @@ export class CartService {
   async getCart(userId: string) {
     let cart = await this.cartModel.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price images slug',
+      select: 'name price images slug imageUrl',
     });
 
     if (!cart) {
@@ -43,7 +43,7 @@ export class CartService {
     const savedCart = await cart.save();
     return savedCart.populate({
       path: 'items.product',
-      select: 'name price images slug', // only keep these fields
+      select: 'name price images slug imageUrl', // only keep these fields
     });
   }
 
@@ -59,7 +59,11 @@ export class CartService {
 
     item.quantity = dto.quantity;
 
-    return cart.save();
+    const savedCart = await cart.save();
+    return savedCart.populate({
+      path: 'items.product',
+      select: 'name price images slug imageUrl', // only keep these fields
+    });
   }
 
   async removeItem(userId: string, productId: string, size: string) {
@@ -69,7 +73,11 @@ export class CartService {
       (i) => !(i.product._id.toString() === productId && i.size === size),
     );
 
-    return cart.save();
+    const savedCart = await cart.save();
+    return savedCart.populate({
+      path: 'items.product',
+      select: 'name price images slug imageUrl', // only keep these fields
+    });
   }
 
   async clearCart(userId: string) {
