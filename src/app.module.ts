@@ -13,6 +13,8 @@ import { TypeModule } from './modules/type/type.module';
 import { ProductModule } from './modules/product/product.module';
 import { BlogPostModule } from './modules/blog/blog.module';
 import { CartModule } from './modules/cart/cart.module';
+import { BillingInformationModule } from './modules/billing-information/billing-information.module';
+import { PaystackModule } from './modules/paystack/paystack.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { CartModule } from './modules/cart/cart.module';
     ProductModule,
     BlogPostModule,
     CartModule,
+    BillingInformationModule,
+    PaystackModule,
   ],
   controllers: [AppController],
   providers: [AppService],

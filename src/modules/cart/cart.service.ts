@@ -31,7 +31,7 @@ export class CartService {
     );
 
     if (existingItem) {
-      existingItem.quantity += dto.quantity;
+      existingItem.quantity = dto.quantity;
     } else {
       cart.items.push({
         product: new Types.ObjectId(dto.product),
