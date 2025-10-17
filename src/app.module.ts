@@ -15,7 +15,7 @@ import { BlogPostModule } from './modules/blog/blog.module';
 import { CartModule } from './modules/cart/cart.module';
 import { BillingInformationModule } from './modules/billing-information/billing-information.module';
 import { PaystackModule } from './modules/paystack/paystack.module';
-import { OrderModule } from './modules/order/order.module';
+import { OrdersModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -42,7 +42,7 @@ import { OrderModule } from './modules/order/order.module';
     CartModule,
     BillingInformationModule,
     PaystackModule,
-    OrderModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
