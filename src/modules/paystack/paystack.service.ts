@@ -4,8 +4,8 @@ import axios from 'axios';
 
 @Injectable()
 export class PaystackService {
-  private readonly baseUrl = process.env.PAYSTACK_BASE_URL;
-  private readonly secretKey = process.env.PAYSTACK_SECRET_KEY;
+  //   private readonly baseUrl = process.env.PAYSTACK_BASE_URL;
+  private readonly secretKey = process.env.TEST_PAYSTACK_SECRET_KEY;
 
   async initializeTransaction(
     email: string,
@@ -14,10 +14,10 @@ export class PaystackService {
   ) {
     try {
       const response = await axios.post(
-        `${this.baseUrl}/transaction/initialize`,
+        `https://api.paystack.co/transaction/initialize`,
         {
           email,
-          amount: amount * 100, // Paystack expects amount in kobo
+          amount: amount,
           callback_url: callbackUrl,
         },
         {
@@ -39,7 +39,7 @@ export class PaystackService {
   async verifyTransaction(reference: string) {
     try {
       const response = await axios.get(
-        `${this.baseUrl}/transaction/verify/${reference}`,
+        `https://api.paystack.co/transaction/verify/${reference}`,
         {
           headers: { Authorization: `Bearer ${this.secretKey}` },
         },
