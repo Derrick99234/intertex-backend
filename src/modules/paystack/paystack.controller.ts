@@ -1,4 +1,3 @@
-// paystack.controller.ts
 import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { PaystackService } from './paystack.service';
 
@@ -8,7 +7,8 @@ export class PaystackController {
 
   @Post('initialize')
   async initialize(@Body() body: { email: string; amount: number }) {
-    const callbackUrl = 'http://localhost:3000/payment/callback'; // change in production
+    const callbackUrl = 'http://localhost:3000/order';
+
     return this.paystackService.initializeTransaction(
       body.email,
       body.amount,

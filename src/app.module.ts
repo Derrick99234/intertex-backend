@@ -16,6 +16,7 @@ import { CartModule } from './modules/cart/cart.module';
 import { BillingInformationModule } from './modules/billing-information/billing-information.module';
 import { PaystackModule } from './modules/paystack/paystack.module';
 import { OrdersModule } from './modules/order/order.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { OrdersModule } from './modules/order/order.module';
     BillingInformationModule,
     PaystackModule,
     OrdersModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
