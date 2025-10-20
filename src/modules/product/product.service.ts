@@ -54,7 +54,6 @@ export class ProductService {
         path: 'subcategory',
         populate: {
           path: 'category',
-          model: 'Category',
           select: 'name slug',
         },
       })
@@ -69,7 +68,6 @@ export class ProductService {
         path: 'subcategory',
         populate: {
           path: 'category',
-          model: 'Category',
           select: 'name slug',
         },
       })
@@ -152,7 +150,17 @@ export class ProductService {
     );
     const subcategoryIds = subcategories.map((sub) => sub._id);
 
-    return this.productModel.find({ subcategory: { $in: subcategoryIds } });
+    return this.productModel
+      .find({ subcategory: { $in: subcategoryIds } })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
   }
 
   async fetchProductsByType(slug: string): Promise<Product[]> {

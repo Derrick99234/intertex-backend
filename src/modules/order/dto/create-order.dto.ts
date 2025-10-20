@@ -28,10 +28,6 @@ export class CreateOrderDto {
 
   @IsString()
   @IsNotEmpty()
-  orderId: string;
-
-  @IsString()
-  @IsNotEmpty()
   deliveryMethod: string;
 
   @IsNumber()

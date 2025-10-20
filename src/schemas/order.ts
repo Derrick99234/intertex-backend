@@ -20,9 +20,6 @@ export class Order extends Document {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   userId: Types.ObjectId;
 
-  @Prop({ required: true, unique: true })
-  orderId: string;
-
   @Prop({ required: true })
   deliveryMethod: string;
 

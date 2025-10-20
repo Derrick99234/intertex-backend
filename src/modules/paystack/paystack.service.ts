@@ -10,6 +10,7 @@ export class PaystackService {
   async initializeTransaction(
     email: string,
     amount: number,
+    metadata: string,
     callbackUrl: string,
   ) {
     try {
@@ -17,7 +18,8 @@ export class PaystackService {
         `https://api.paystack.co/transaction/initialize`,
         {
           email,
-          amount: amount,
+          amount,
+          metadata,
           callback_url: callbackUrl,
         },
         {

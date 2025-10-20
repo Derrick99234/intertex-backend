@@ -1,17 +1,39 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from 'src/schemas/order';
+import { Cart } from 'src/schemas/cart.schema';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(@InjectModel(Order.name) private orderModel: Model<Order>) {}
+  constructor(
+    @InjectModel(Order.name) private orderModel: Model<Order>,
+    private cartService: CartService,
+  ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  async create(createOrderDto: CreateOrderDto) {
     const order = new this.orderModel(createOrderDto);
-    return order.save();
+    const savedOrder = await order.save();
+
+    const itemUpdates = createOrderDto.products.map((item) => {
+      return {
+        productId: item.productId,
+        size: item.size,
+      };
+    });
+
+    for (const update of itemUpdates) {
+      await this.cartService.removeItem(
+        createOrderDto.userId,
+        update.productId,
+        update.size,
+      );
+    }
+
+    return savedOrder;
   }
 
   async findAll(): Promise<Order[]> {

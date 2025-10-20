@@ -70,7 +70,11 @@ export class CartService {
     const cart = await this.getCart(userId);
 
     cart.items = cart.items.filter(
-      (i) => !(i.product._id.toString() === productId && i.size === size),
+      (i) =>
+        !(
+          (i.product._id?.toString?.() || i.product.toString?.()) ===
+            productId && i.size === size
+        ),
     );
 
     const savedCart = await cart.save();
