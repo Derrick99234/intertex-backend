@@ -12,6 +12,7 @@ import {
   HttpStatus,
   HttpCode,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -72,6 +73,28 @@ export class ProductController {
       message: 'All products retrieved',
       products,
     };
+  }
+
+  @Get('search')
+  async searchProducts(
+    @Query('keyword') keyword: string,
+    @Query('category') categorySlug?: string,
+    @Query('subcategory') subcategorySlug?: string,
+    @Query('productType') productTypeSlug?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+  ) {
+    const filters = {
+      categorySlug: categorySlug,
+      subcategorySlug: subcategorySlug,
+      productTypeSlug: productTypeSlug,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    };
+    console.log(`Keyword: ${keyword}, Filters: `, filters);
+
+    const products = await this.productService.searchProducts(keyword, filters);
+    return products;
   }
 
   @Get(':id')

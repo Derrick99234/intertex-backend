@@ -110,12 +110,102 @@ export class ProductService {
     return { message: 'Product deleted successfully' };
   }
 
-  async searchProducts(keyword: string): Promise<Product[]> {
-    const regex = new RegExp(keyword, 'i'); // Case-insensitive regex for partial match
-    return this.productModel
-      .find({
-        $or: [{ name: regex }, { description: regex }],
-      })
+  // async searchProducts(keyword: string): Promise<Product[]> {
+  //   const regex = new RegExp(keyword, 'i'); // Case-insensitive regex for partial match
+  //   return this.productModel
+  //     .find({
+  //       $or: [{ productName: regex }, { description: regex }],
+  //     })
+  //     .populate({
+  //       path: 'subcategory',
+  //       populate: {
+  //         path: 'category',
+  //         model: 'Category',
+  //         select: 'name slug',
+  //       },
+  //     })
+  //     .populate('productType');
+  // }
+
+  async searchProducts(
+    keyword: string,
+    filters?: {
+      categorySlug?: string;
+      subcategorySlug?: string;
+      productTypeSlug?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    },
+  ): Promise<Product[]> {
+    // Case-insensitive partial match for keyword
+    const keywordRegex =
+      keyword && keyword.trim().length > 0
+        ? new RegExp(keyword.trim(), 'i')
+        : /.*/;
+
+    // Base query
+    const filterQuery: any = {
+      $or: [{ productName: keywordRegex }, { description: keywordRegex }],
+    };
+
+    // ✅ Category filter
+    if (filters?.categorySlug && filters.categorySlug.trim()) {
+      const category = await this.categoryService.findOneBySlug(
+        filters.categorySlug,
+      );
+      if (category?._id) {
+        const subcategories = await this.subcategoryService.findByCategory(
+          category._id as string,
+        );
+        const subcategoryIds = subcategories.map((sub) => sub._id);
+        filterQuery.subcategory = { $in: subcategoryIds };
+      }
+    }
+
+    // ✅ Subcategory filter
+    if (filters?.subcategorySlug && filters.subcategorySlug.trim()) {
+      const subcategory = await this.subcategoryService.findOneBySlug(
+        filters.subcategorySlug,
+      );
+      if (!subcategory) {
+        throw new NotFoundException(
+          `Subcategory with slug "${filters.subcategorySlug}" not found`,
+        );
+      }
+      filterQuery.subcategory = subcategory._id;
+    }
+
+    // ✅ Product type filter
+    if (filters?.productTypeSlug && filters.productTypeSlug.trim()) {
+      const productType = await this.typeService.findOneBySlug(
+        filters.productTypeSlug,
+      );
+      if (!productType) {
+        throw new NotFoundException(
+          `Product type with slug "${filters.productTypeSlug}" not found`,
+        );
+      }
+      filterQuery.productType = productType._id;
+    }
+
+    // ✅ Price range filter
+    const minPriceValid =
+      filters?.minPrice !== undefined && !isNaN(filters.minPrice);
+    const maxPriceValid =
+      filters?.maxPrice !== undefined && !isNaN(filters.maxPrice);
+
+    if (minPriceValid || maxPriceValid) {
+      filterQuery.price = {};
+      if (minPriceValid) filterQuery.price.$gte = filters!.minPrice;
+      if (maxPriceValid) filterQuery.price.$lte = filters!.maxPrice;
+    }
+
+    // 🧠 Debugging logs
+    console.log('🧩 Search Query:', JSON.stringify(filterQuery, null, 2));
+
+    // Fetch results
+    const results = await this.productModel
+      .find(filterQuery)
       .populate({
         path: 'subcategory',
         populate: {
@@ -125,6 +215,9 @@ export class ProductService {
         },
       })
       .populate('productType');
+
+    console.log(`✅ Found ${results.length} product(s) for "${keyword}"`);
+    return results;
   }
 
   async fetchLatestProducts(limit: number): Promise<Product[]> {
