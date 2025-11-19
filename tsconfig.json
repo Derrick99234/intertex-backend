@@ -1,28 +1,21 @@
 {
   "compilerOptions": {
-    "module": "commonjs", // Keep as is
-    "declaration": true, // Generates .d.ts files (good for TypeScript projects)
-    "removeComments": true, // Removes comments in compiled JS files
-    "emitDecoratorMetadata": true, // Enables metadata for decorators (required by NestJS)
-    "experimentalDecorators": true, // Enables decorators (required by NestJS)
-    "allowSyntheticDefaultImports": true, // Allows synthetic imports
-    "target": "ES2021", // Modern target, can be changed if needed
-    "sourceMap": true, // Generates source maps for debugging
-    "outDir": "./dist", // Output directory for compiled JS
-    "baseUrl": "./", // Base directory for resolving non-relative paths
-    "incremental": true, // Enable incremental compilation for faster builds
-    "skipLibCheck": true, // Skip checking library files for type errors (speeds up build)
-    "strictNullChecks": false, // Allow null values (NestJS works fine with this off)
-    "noImplicitAny": false, // Allows `any` type (NestJS sometimes requires this)
-    "strictBindCallApply": false, // Disable strict checking for `bind`, `call`, and `apply`
-    "forceConsistentCasingInFileNames": false, // Optional: Disable case-sensitive filename checks (useful for Windows)
-    "noFallthroughCasesInSwitch": false, // Allow fallthrough in switch statements
-    "moduleResolution": "node", // Ensure proper resolution of node modules
-    "resolveJsonModule": true, // Allows importing JSON files (useful for certain configurations)
-    "paths": {
-      "@src/*": ["src/*"] // Add path mapping to resolve src files properly
-    }
-  },
-  "include": ["src/**/*.ts"], // Include all .ts files in src directory
-  "exclude": ["node_modules", "dist"] // Exclude node_modules and dist from compilation
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
+  }
 }

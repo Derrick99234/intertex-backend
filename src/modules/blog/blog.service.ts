@@ -29,6 +29,12 @@ export class BlogPostService {
     return post;
   }
 
+  async findBySlug(slug: string): Promise<BlogPost> {
+    const post = await this.postModel.findOne({ slug }).exec();
+    if (!post) throw new NotFoundException('Post not found');
+    return post;
+  }
+
   async update(
     id: string,
     updatePostDto: UpdateBlogPostDto,

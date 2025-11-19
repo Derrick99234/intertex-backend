@@ -15,7 +15,17 @@ export class BlogPost {
   description: string;
 
   @Prop()
+  slug: string;
+
+  @Prop()
   imageCover: string; // store image URL or path
 }
 
 export const BlogPostSchema = SchemaFactory.createForClass(BlogPost);
+
+BlogPostSchema.pre('save', function (next) {
+  if (!this.slug && this.title) {
+    this.slug = this.title.toLowerCase().replace(/\s+/g, '-');
+  }
+  next();
+});
