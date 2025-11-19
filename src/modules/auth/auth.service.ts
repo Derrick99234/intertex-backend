@@ -6,7 +6,6 @@ import {
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { User } from 'src/schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 
 type AuthInput = {

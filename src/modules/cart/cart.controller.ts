@@ -1,4 +1,3 @@
-// src/cart/cart.controller.ts
 import {
   Controller,
   Get,
@@ -13,7 +12,7 @@ import { CartService } from './cart.service';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { AddToCartDto } from './dto/create-cart.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
-import { AuthUser } from 'src/common/decorators/auth-user.decorator';
+import { AuthUser } from '../../common/decorators/auth-user.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('cart')

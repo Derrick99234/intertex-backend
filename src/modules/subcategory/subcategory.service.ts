@@ -1,11 +1,9 @@
-// src/modules/subcategory/subcategory.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
 import { UpdateSubcategoryDto } from './dto/update-subcategory.dto';
-import { Subcategory } from 'src/schemas/subcategory.schema';
+import { Subcategory } from '../../schemas/subcategory.schema';
 import { CategoryService } from '../category/category.service';
 
 @Injectable()

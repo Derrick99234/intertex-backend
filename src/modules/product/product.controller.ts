@@ -1,4 +1,3 @@
-// src/modules/product/product.controller.ts
 import {
   Controller,
   Post,
@@ -19,9 +18,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-// import { createMulterS3Options } from 'src/configs/aws-s3.config';
-// import { ConfigService } from '@nestjs/config';
-import { awsOption } from 'src/configs/aws-s3.config';
+import { awsOption } from '../../configs/aws-s3.config';
 @Controller('products')
 export class ProductController {
   constructor(

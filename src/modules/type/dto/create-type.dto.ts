@@ -1,4 +1,3 @@
-// src/modules/type/dto/create-type.dto.ts
 import {
   IsNotEmpty,
   IsString,

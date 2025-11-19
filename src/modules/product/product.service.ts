@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { TypeService } from '../type/type.service';
-import { Product } from 'src/schemas/product.schema';
+import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
 

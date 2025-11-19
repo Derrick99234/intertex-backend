@@ -1,8 +1,7 @@
-// src/billing-information/billing-information.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { BillingInformation } from 'src/schemas/billing-information.schema';
+import { BillingInformation } from '../../schemas/billing-information.schema';
 import { CreateBillingInformationDto } from './dto/create-billing-information.dto';
 import { UpdateBillingInformationDto } from './dto/update-billing-information.dto';
 

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { BlogPostService } from './blog.service';
 import { UpdateBlogPostDto } from './dto/update-blog.dto';
-import { awsOption } from 'src/configs/aws-s3.config';
+import { awsOption } from '../../configs/aws-s3.config';
 import {
   FileFieldsInterceptor,
   FileInterceptor,

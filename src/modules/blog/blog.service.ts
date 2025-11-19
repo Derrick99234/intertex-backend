@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BlogPost, BlogPostDocument } from 'src/schemas/blog.schema';
+import { BlogPost, BlogPostDocument } from '../../schemas/blog.schema';
 import { CreateBlogPostDto } from './dto/create-blog.dto';
 import { UpdateBlogPostDto } from './dto/update-blog.dto';
 @Injectable()

@@ -7,9 +7,9 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { Admin } from 'src/schemas/admin.schema';
+import { Admin } from '../../schemas/admin.schema';
 import { ConfigService } from '@nestjs/config';
-import { AdminRoles } from 'src/common/utils/enums.utils';
+import { AdminRoles } from '../../common/utils/enums.utils';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

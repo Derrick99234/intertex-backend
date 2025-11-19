@@ -3,7 +3,7 @@ import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { UserService } from '../user/user.service';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
-import { AuthUser } from 'src/common/decorators/auth-user.decorator';
+import { AuthUser } from '../../common/decorators/auth-user.decorator';
 
 @Controller('admin')
 export class AdminController {

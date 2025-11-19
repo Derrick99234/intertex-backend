@@ -7,12 +7,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
 
 import { faker } from '@faker-js/faker';
+import { User } from '../../schemas/user.schema';
 
 @Injectable()
 export class UserService {

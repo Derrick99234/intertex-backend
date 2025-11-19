@@ -10,10 +10,10 @@ import { Model, Types, isValidObjectId } from 'mongoose';
 import { CreateTypeDto } from './dto/create-type.dto';
 import { UpdateTypeDto } from './dto/update-type.dto';
 import { SubcategoryService } from '../subcategory/subcategory.service';
-import { ProductType } from 'src/schemas/type.schema';
 import { CategoryService } from '../category/category.service';
 import { ProductService } from '../product/product.service';
 import { OrdersService } from '../order/order.service';
+import { ProductType } from '../../schemas/type.schema';
 
 @Injectable()
 export class TypeService {

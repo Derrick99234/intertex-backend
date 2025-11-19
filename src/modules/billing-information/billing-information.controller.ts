@@ -1,4 +1,3 @@
-// src/billing-information/billing-information.controller.ts
 import {
   Controller,
   Get,
@@ -10,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BillingInformationService } from './billing-information.service';
-import { BillingInformation } from 'src/schemas/billing-information.schema';
 import { CreateBillingInformationDto } from './dto/create-billing-information.dto';
 import { UpdateBillingInformationDto } from './dto/update-billing-information.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';

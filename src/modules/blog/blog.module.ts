@@ -2,7 +2,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogPostService } from './blog.service';
-import { BlogPost, BlogPostSchema } from 'src/schemas/blog.schema';
+import { BlogPost, BlogPostSchema } from '../../schemas/blog.schema';
 import { BlogPostController } from './blog.controller';
 
 @Module({

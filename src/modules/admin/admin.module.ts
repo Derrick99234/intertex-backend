@@ -4,7 +4,7 @@ import { AdminController } from './admin.controller';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Admin, AdminSchema } from 'src/schemas/admin.schema';
+import { Admin, AdminSchema } from '../../schemas/admin.schema';
 import { UserModule } from '../user/user.module';
 
 @Module({
