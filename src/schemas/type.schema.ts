@@ -13,6 +13,12 @@ export class ProductType extends Document {
   @Prop()
   slug: string;
 
+  @Prop()
+  totalProducts: number;
+
+  @Prop()
+  totalSold: number;
+
   @Prop({ default: true })
   status: boolean;
 

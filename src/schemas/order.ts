@@ -23,6 +23,18 @@ export class Order extends Document {
   @Prop({ required: true })
   deliveryMethod: string;
 
+  @Prop({
+    type: {
+      deliveryAddress: { type: String, required: true },
+      phoneNumber: { type: String, required: true },
+    },
+    required: true,
+  })
+  deliveryInformation: {
+    deliveryAddress: string;
+    phoneNumber: string;
+  };
+
   @Prop({ required: true })
   amount: number;
 

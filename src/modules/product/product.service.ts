@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -12,9 +17,10 @@ import { CategoryService } from '../category/category.service';
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
+    @Inject(forwardRef(() => TypeService))
     private readonly typeService: TypeService,
-    private readonly subcategoryService: SubcategoryService,
-    private readonly categoryService: CategoryService,
+    private subcategoryService: SubcategoryService,
+    private categoryService: CategoryService,
   ) {}
 
   async create(
@@ -45,6 +51,24 @@ export class ProductService {
     ]);
 
     return populatedProduct;
+  }
+
+  async countProductsByProductType() {
+    try {
+      // Run aggregation to group products by productType and count them
+      const productCountByType = await this.productModel.aggregate([
+        {
+          $group: {
+            _id: '$productType', // Group by the productType field
+            count: { $sum: 1 }, // Count how many products belong to each productType
+          },
+        },
+      ]);
+
+      return productCountByType;
+    } catch (error) {
+      throw new Error('Could not count products by product type.');
+    }
   }
 
   async findAll(): Promise<Product[]> {
@@ -201,7 +225,6 @@ export class ProductService {
     }
 
     // 🧠 Debugging logs
-    console.log('🧩 Search Query:', JSON.stringify(filterQuery, null, 2));
 
     // Fetch results
     const results = await this.productModel
@@ -216,7 +239,6 @@ export class ProductService {
       })
       .populate('productType');
 
-    console.log(`✅ Found ${results.length} product(s) for "${keyword}"`);
     return results;
   }
 

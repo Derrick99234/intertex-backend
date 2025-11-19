@@ -45,6 +45,25 @@ export class TypeController {
     };
   }
 
+  @Get('update-total-products')
+  async updateTotalProducts() {
+    return this.typeService.updateTotalProducts();
+  }
+  @Get('update-total-sold')
+  async updateTotalSold() {
+    try {
+      await this.typeService.updateTotalSold();
+      return {
+        message: 'Total sold counts updated successfully.',
+      };
+    } catch (error) {
+      return {
+        message: 'Error updating total sold counts.',
+        error: error.message,
+      };
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const type = await this.typeService.findOne(id);

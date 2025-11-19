@@ -47,6 +47,24 @@ export class OrdersService {
       .exec();
   }
 
+  // New method to find orders by userId
+  async findAllByUser(userId: string): Promise<Order[]> {
+    const orders = await this.orderModel
+      .find({ userId }) // Filter orders by userId
+      .populate(
+        'products.productId',
+        'productName price imageUrl slug offer features process materials description',
+      )
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (!orders || orders.length === 0) {
+      throw new NotFoundException('No orders found for this user');
+    }
+
+    return orders;
+  }
+
   async findOne(id: string): Promise<Order> {
     const order = await this.orderModel
       .findById(id)

@@ -91,7 +91,6 @@ export class ProductController {
       minPrice: minPrice,
       maxPrice: maxPrice,
     };
-    console.log(`Keyword: ${keyword}, Filters: `, filters);
 
     const products = await this.productService.searchProducts(keyword, filters);
     return products;

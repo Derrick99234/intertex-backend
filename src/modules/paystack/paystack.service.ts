@@ -14,7 +14,6 @@ export class PaystackService {
     callbackUrl: string,
   ) {
     try {
-      console.log('Paystack key:', this.secretKey);
       const response = await axios.post(
         `https://api.paystack.co/transaction/initialize`,
         {

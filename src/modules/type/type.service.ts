@@ -2,23 +2,129 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, isValidObjectId } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 import { CreateTypeDto } from './dto/create-type.dto';
 import { UpdateTypeDto } from './dto/update-type.dto';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { ProductType } from 'src/schemas/type.schema';
 import { CategoryService } from '../category/category.service';
+import { ProductService } from '../product/product.service';
+import { OrdersService } from '../order/order.service';
 
 @Injectable()
 export class TypeService {
   constructor(
     @InjectModel(ProductType.name)
-    private readonly typeModel: Model<ProductType>,
-    private readonly categoryService: CategoryService,
-    private readonly subcategoryService: SubcategoryService,
+    private typeModel: Model<ProductType>,
+    private categoryService: CategoryService,
+    private productService: ProductService,
+    private subcategoryService: SubcategoryService,
+    private orderService: OrdersService,
   ) {}
+
+  async updateTotalProducts() {
+    try {
+      // Step 1: Get the product count by product type from the service
+      const productCountByType =
+        await this.productService.countProductsByProductType();
+
+      // Step 2: Get all product types
+      const allProductTypes = await this.typeModel.find();
+
+      // Step 3: Loop through all product types
+      for (const productType of allProductTypes) {
+        // Step 4: Find the corresponding product type count from the aggregation result
+        const matchingProductTypeCount = productCountByType.find(
+          (item) => item._id.toString() === productType._id.toString(),
+        );
+
+        // If no matching count is found, set totalProducts to 0
+        const totalProducts = matchingProductTypeCount
+          ? matchingProductTypeCount.count
+          : 0;
+
+        // Step 5: Update the product type with the total product count
+        await this.typeModel.findByIdAndUpdate(
+          productType._id, // Update by the productType ID
+          { totalProducts }, // Set totalProducts to the count (or 0 if not found)
+          { new: true }, // Return the updated document
+        );
+      }
+    } catch (error) {
+      console.error('Error updating total products in ProductType:', error);
+    }
+  }
+
+  async updateTotalSold() {
+    try {
+      // Step 1: Get all successful orders and populate productId
+      const successfulOrders = (await this.orderService.findAll())
+        .filter((order) => order.status === 'successful')
+        .map((order) => {
+          // Ensure productId is converted to ObjectId only if it's not already an ObjectId
+          order.products = order.products.map((productItem) => {
+            const productId = productItem.productId;
+            if (
+              productId &&
+              typeof productId === 'string' &&
+              !Types.ObjectId.isValid(productId)
+            ) {
+              // Handle case where productId is an invalid string, log and skip or handle error.
+
+              return productItem; // Skip or handle invalid productId
+            }
+            return {
+              ...productItem,
+              productId: Types.ObjectId.isValid(productId)
+                ? new Types.ObjectId(productId)
+                : productId,
+            };
+          });
+          return order;
+        });
+
+      // Step 3: Loop through all successful orders
+      let totalSold = 0;
+      for (const order of successfulOrders) {
+        // Step 4: Loop through each product in the order
+        for (const productItem of order.products) {
+          const productId = productItem.productId;
+
+          // Step 5: Ensure productId is a valid ObjectId before querying Product
+          if (!Types.ObjectId.isValid(productId)) {
+            continue; // Skip invalid productId
+          }
+
+          const product = await this.productService.findOne(String(productId));
+
+          if (product && product.productType) {
+            const productTypeId = product.productType._id; // Assuming `productType` is stored in the Product schema
+
+            // Step 6: Find the corresponding product type
+            const productType = await this.typeModel.findById(productTypeId);
+
+            if (productType) {
+              // Step 7: Update totalSold by adding the quantity of the current product sold
+              totalSold += productItem.quantity;
+
+              // Step 8: Update the product type with the new totalSold value
+              await this.typeModel.findByIdAndUpdate(
+                productTypeId, // Update by productType ID
+                { totalSold }, // Set new totalSold value
+                { new: true }, // Return the updated document
+              );
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error updating total sold in ProductType:', error);
+    }
+  }
 
   async create(createTypeDto: CreateTypeDto): Promise<ProductType> {
     await this.subcategoryService.findOne(createTypeDto.subcategory);
