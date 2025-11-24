@@ -179,7 +179,7 @@ export class ProductService {
       );
       if (category?._id) {
         const subcategories = await this.subcategoryService.findByCategory(
-          category._id as string,
+          category._id as unknown as string,
         );
         const subcategoryIds = subcategories.map((sub) => sub._id);
         filterQuery.subcategory = { $in: subcategoryIds };
@@ -261,7 +261,7 @@ export class ProductService {
   async fetchProductsByCategory(slug: string): Promise<Product[]> {
     const category = await this.categoryService.findOneBySlug(slug);
     const subcategories = await this.subcategoryService.findByCategory(
-      category._id as string,
+      category._id as unknown as string,
     );
     const subcategoryIds = subcategories.map((sub) => sub._id);
 
@@ -299,7 +299,7 @@ export class ProductService {
   ): Promise<Product[]> {
     const category = await this.categoryService.findOneBySlug(categorySlug);
     const subcategories = await this.subcategoryService.findByCategory(
-      category._id as string,
+      category._id.toString(),
     );
     const subcategoryIds = subcategories.map((sub) => sub._id.toString());
 
