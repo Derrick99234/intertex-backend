@@ -13,10 +13,10 @@ export class ProductType extends Document {
   @Prop()
   slug: string;
 
-  @Prop()
+  @Prop({ default: 0 })
   totalProducts: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   totalSold: number;
 
   @Prop({ default: true })
