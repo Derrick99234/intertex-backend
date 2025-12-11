@@ -12,6 +12,7 @@ import { TypeService } from '../type/type.service';
 import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class ProductService {
@@ -22,6 +23,48 @@ export class ProductService {
     private subcategoryService: SubcategoryService,
     private categoryService: CategoryService,
   ) {}
+
+  private s3 = new S3Client({
+    region: 'eu-north-1', // Change to your region
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  });
+
+  private extractKeyFromUrl(url: string): string {
+    console.log('URL received:', url); // Log the URL for debugging
+    try {
+      const urlObj = new URL(url); // Try to parse the URL
+      return decodeURIComponent(urlObj.pathname.substring(1)); // Remove leading "/"
+    } catch (error) {
+      console.error('Error parsing URL:', error);
+      throw new Error('Invalid URL provided');
+    }
+  }
+
+  async deleteFileFromUrl(url: string): Promise<void> {
+    const Bucket = 'intertex-storage'; // Your bucket name
+    const Key = this.extractKeyFromUrl(url);
+
+    try {
+      // Send delete command to AWS S3
+      await this.s3.send(new DeleteObjectCommand({ Bucket, Key }));
+    } catch (error) {
+      console.error('Error deleting file from S3:', error);
+      throw new Error('Failed to delete file');
+    }
+  }
+
+  async deleteFilesFromUrls(urls: string | string[]): Promise<void> {
+    // If it's a single URL string, convert it to an array
+    const urlArray = Array.isArray(urls) ? urls : [urls];
+
+    // Loop over each URL and delete it
+    for (const url of urlArray) {
+      await this.deleteFileFromUrl(url);
+    }
+  }
 
   async create(
     createProductDto: CreateProductDto,
@@ -107,19 +150,40 @@ export class ProductService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-    imageUrl: any,
-    otherImages: any,
+    newImages: any,
   ): Promise<Product> {
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
     const updated = await this.productModel
       .findByIdAndUpdate(
         id,
-        { ...updateProductDto, imageUrl, otherImages },
+        {
+          ...updateProductDto,
+          otherImages: [...(newImages || []), ...product.otherImages],
+        },
         { new: true },
       )
       .populate('productType');
 
     if (!updated) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    if (
+      updateProductDto.deleteImages &&
+      updateProductDto.deleteImages.length > 0
+    ) {
+      updated.otherImages = updated.otherImages.filter(
+        (img) => !updateProductDto.deleteImages.includes(img),
+      );
+
+      // Call AWS S3 to delete the images from the bucket
+      const res = await this.deleteFilesFromUrls(updateProductDto.deleteImages);
+
+      await updated.save();
     }
 
     return updated;

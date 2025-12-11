@@ -12,6 +12,11 @@ export class AdminController {
     private userService: UserService,
   ) {}
 
+  @Post('create')
+  async createAdmin() {
+    return this.adminService.createSuperAdmin();
+  }
+
   @Post('login')
   async login(@Body() loginDto: AdminLoginDto) {
     return this.adminService.login(loginDto.email, loginDto.password);

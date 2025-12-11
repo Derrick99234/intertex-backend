@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import { S3Client } from '@aws-sdk/client-s3';
 import * as multerS3 from 'multer-s3';
 import * as dotenv from 'dotenv';
@@ -20,8 +20,8 @@ export const awsOption = {
       cb(null, { fieldName: file.fieldname });
     },
     key: (req, file, cb) => {
-      const ext = file.originalname.split('.').pop();
-      cb(null, `testing-folder/${uuidv4()}.${ext}`);
+      // const ext = file.originalname.split('.').pop();
+      cb(null, `products/${file.originalname}`);
     },
   }),
 };

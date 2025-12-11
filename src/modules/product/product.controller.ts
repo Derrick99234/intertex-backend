@@ -104,31 +104,22 @@ export class ProductController {
 
   @Patch(':id')
   @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'imageUrl', maxCount: 1 },
-        { name: 'otherImages', maxCount: 5 },
-      ],
-      awsOption,
-    ),
+    FileFieldsInterceptor([{ name: 'newImages', maxCount: 5 }], awsOption),
   )
   async update(
     @Param('id') id: string,
     @UploadedFiles()
     files: {
-      imageUrl?: (Express.Multer.File & { location?: string })[];
-      otherImages?: (Express.Multer.File & { location?: string })[];
+      newImages?: (Express.Multer.File & { location?: string })[];
     },
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    const imageUrl = files.imageUrl?.[0]?.location;
-    const otherImages = files.otherImages?.map((f) => f.location);
+    const newImages = files.newImages?.map((f) => f.location);
 
     const product = await this.productService.update(
       id,
       updateProductDto,
-      imageUrl,
-      otherImages,
+      newImages,
     );
 
     return {
