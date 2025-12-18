@@ -19,6 +19,7 @@ export class PlatformLoginService {
       });
     } else {
       await this.authService.createUser(createUserDto);
+      const user = await this.userService.findByEmail(createUserDto.email);
       return await this.authService.signIn({
         userId: user._id.toString(),
       });
