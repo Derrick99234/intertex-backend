@@ -17,6 +17,7 @@ import { BillingInformationModule } from './modules/billing-information/billing-
 import { PaystackModule } from './modules/paystack/paystack.module';
 import { OrdersModule } from './modules/order/order.module';
 import { HealthModule } from './modules/health/health.module';
+import { PlatformLoginModule } from './modules/platform-login/platform-login.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { HealthModule } from './modules/health/health.module';
     PaystackModule,
     OrdersModule,
     HealthModule,
+    PlatformLoginModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -57,7 +57,7 @@ export class AuthService {
     };
   }
 
-  private async signIn(user: SignInPayload): Promise<AuthResult> {
+  async signIn(user: SignInPayload): Promise<AuthResult> {
     const payload = {
       sub: user.userId,
     };
