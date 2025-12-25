@@ -23,12 +23,14 @@ export class CreateBillingInformationDto {
   additionalInformation?: string;
 
   @IsOptional()
-  @IsPhoneNumber()
   secondPhoneNumber?: string;
 
-  @IsPhoneNumber()
+  @IsString()
   phoneNumber: string;
 
   @IsString()
   fullName: string;
+
+  @IsOptional()
+  isDefault: boolean;
 }

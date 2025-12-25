@@ -30,6 +30,12 @@ export class CreateOrderDto {
   @IsNotEmpty()
   deliveryMethod: string;
 
+  @IsNotEmpty()
+  deliveryInformation: {
+    deliveryAddress: string;
+    phoneNumber: string;
+  };
+
   @IsNumber()
   amount: number;
 

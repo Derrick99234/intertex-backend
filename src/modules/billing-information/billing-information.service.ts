@@ -13,6 +13,17 @@ export class BillingInformationService {
   ) {}
 
   async create(data: CreateBillingInformationDto) {
+    if (data.isDefault === true) {
+      await this.billingModel.updateMany(
+        {
+          user: data.user,
+        },
+        {
+          $set: { isDefault: false },
+        },
+      );
+    }
+
     const billing = new this.billingModel(data);
     return billing.save();
   }
@@ -33,13 +44,34 @@ export class BillingInformationService {
   }
 
   async update(id: string, data: UpdateBillingInformationDto) {
-    const billing = await this.billingModel
+    // If this address is being set as default
+    if (data.isDefault === true) {
+      const billing = await this.billingModel.findById(id).exec();
+
+      if (!billing) {
+        throw new NotFoundException(`Billing info with ID ${id} not found`);
+      }
+
+      // Remove default from all other addresses of this user
+      await this.billingModel.updateMany(
+        {
+          user: billing.user,
+          _id: { $ne: id },
+        },
+        { isDefault: false },
+      );
+    }
+
+    // Update the selected address
+    const updatedBilling = await this.billingModel
       .findByIdAndUpdate(id, data, { new: true })
       .exec();
 
-    if (!billing)
+    if (!updatedBilling) {
       throw new NotFoundException(`Billing info with ID ${id} not found`);
-    return billing;
+    }
+
+    return updatedBilling;
   }
 
   async remove(id: string) {

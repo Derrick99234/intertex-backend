@@ -198,23 +198,6 @@ export class ProductService {
     return { message: 'Product deleted successfully' };
   }
 
-  // async searchProducts(keyword: string): Promise<Product[]> {
-  //   const regex = new RegExp(keyword, 'i'); // Case-insensitive regex for partial match
-  //   return this.productModel
-  //     .find({
-  //       $or: [{ productName: regex }, { description: regex }],
-  //     })
-  //     .populate({
-  //       path: 'subcategory',
-  //       populate: {
-  //         path: 'category',
-  //         model: 'Category',
-  //         select: 'name slug',
-  //       },
-  //     })
-  //     .populate('productType');
-  // }
-
   async searchProducts(
     keyword: string,
     filters?: {

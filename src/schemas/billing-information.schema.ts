@@ -27,6 +27,9 @@ export class BillingInformation extends Document {
 
   @Prop()
   fullName: string;
+
+  @Prop({ default: false })
+  isDefault: boolean;
 }
 
 export const BillingInformationSchema =

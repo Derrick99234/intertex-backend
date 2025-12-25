@@ -26,7 +26,7 @@ export class CartService {
     const cart = await this.getCart(userId);
     const existingItem = cart.items.find(
       (item) =>
-        item.product._id.toString() === dto.product && item.size === dto.size,
+        item.product?._id.toString() === dto.product && item.size === dto.size,
     );
 
     if (existingItem) {
