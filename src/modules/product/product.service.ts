@@ -206,6 +206,7 @@ export class ProductService {
       productTypeSlug?: string;
       minPrice?: number;
       maxPrice?: number;
+      sort?: 'newest' | 'price_asc' | 'price_desc';
     },
   ): Promise<Product[]> {
     // Case-insensitive partial match for keyword
@@ -219,6 +220,21 @@ export class ProductService {
       $or: [{ productName: keywordRegex }, { description: keywordRegex }],
     };
 
+    let sortQuery: any = { createdAt: -1 }; // default → newest
+
+    switch (filters?.sort) {
+      case 'price_asc':
+        sortQuery = { price: 1 };
+        break;
+
+      case 'price_desc':
+        sortQuery = { price: -1 };
+        break;
+
+      case 'newest':
+      default:
+        sortQuery = { createdAt: -1 };
+    }
     // ✅ Category filter
     if (filters?.categorySlug && filters.categorySlug.trim()) {
       const category = await this.categoryService.findOneBySlug(
@@ -276,6 +292,7 @@ export class ProductService {
     // Fetch results
     const results = await this.productModel
       .find(filterQuery)
+      .sort(sortQuery)
       .populate({
         path: 'subcategory',
         populate: {

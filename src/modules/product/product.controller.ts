@@ -75,6 +75,7 @@ export class ProductController {
   @Get('search')
   async searchProducts(
     @Query('keyword') keyword: string,
+    @Query('sort') sort: string,
     @Query('category') categorySlug?: string,
     @Query('subcategory') subcategorySlug?: string,
     @Query('productType') productTypeSlug?: string,
@@ -82,11 +83,12 @@ export class ProductController {
     @Query('maxPrice') maxPrice?: number,
   ) {
     const filters = {
-      categorySlug: categorySlug,
-      subcategorySlug: subcategorySlug,
-      productTypeSlug: productTypeSlug,
-      minPrice: minPrice,
-      maxPrice: maxPrice,
+      categorySlug,
+      subcategorySlug,
+      productTypeSlug,
+      minPrice,
+      maxPrice,
+      sort: sort as 'newest' | 'price_asc' | 'price_desc',
     };
 
     const products = await this.productService.searchProducts(keyword, filters);
