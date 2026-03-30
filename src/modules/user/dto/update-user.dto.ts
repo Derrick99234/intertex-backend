@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsEmail,
   IsOptional,
   IsString,
@@ -7,39 +6,47 @@ import {
 } from 'class-validator';
 
 export class UpdateUserDto {
+  @IsOptional()
   @IsString()
-  fullName: string;
+  fullName?: string;
 
+  @IsOptional()
   @IsString()
-  dob: string;
+  dob?: string;
 
+  @IsOptional()
   @IsString()
-  gender: string;
+  gender?: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password?: string;
 
+  @IsOptional()
   @IsString()
-  countryOfResidence: string;
-
-  @IsString()
-  stateOfResidence: string;
-
-  @IsString()
-  phone: string;
-
-  @IsString()
-  city: string;
-
-  @IsString()
-  streetAddress: string;
+  countryOfResidence?: string;
 
   @IsOptional()
   @IsString()
-  isActive: boolean;
+  stateOfResidence?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  streetAddress?: string;
+
+  @IsOptional()
+  isActive?: boolean;
 }

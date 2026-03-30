@@ -15,7 +15,7 @@ import { OrdersModule } from '../order/order.module';
     ]),
     SubcategoryModule,
     CategoryModule,
-    ProductModule,
+    forwardRef(() => ProductModule),
     OrdersModule,
   ],
   controllers: [TypeController],

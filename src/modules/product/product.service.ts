@@ -12,7 +12,7 @@ import { TypeService } from '../type/type.service';
 import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class ProductService {
@@ -24,34 +24,42 @@ export class ProductService {
     private categoryService: CategoryService,
   ) {}
 
-  private s3 = new S3Client({
-    region: 'eu-north-1', // Change to your region
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-  });
+  private readonly s3 =
+    process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+      ? new AWS.S3({
+          region: process.env.AWS_REGION || 'eu-north-1',
+          credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          },
+        })
+      : null;
 
   private extractKeyFromUrl(url: string): string {
-    console.log('URL received:', url); // Log the URL for debugging
     try {
-      const urlObj = new URL(url); // Try to parse the URL
-      return decodeURIComponent(urlObj.pathname.substring(1)); // Remove leading "/"
+      const urlObj = new URL(url);
+      return decodeURIComponent(urlObj.pathname.substring(1));
     } catch (error) {
-      console.error('Error parsing URL:', error);
       throw new Error('Invalid URL provided');
     }
   }
 
   async deleteFileFromUrl(url: string): Promise<void> {
-    const Bucket = 'intertex-storage'; // Your bucket name
+    if (!this.s3) {
+      return;
+    }
+
+    const Bucket = process.env.AWS_BUCKET_NAME || 'intertex-storage';
     const Key = this.extractKeyFromUrl(url);
 
     try {
-      // Send delete command to AWS S3
-      await this.s3.send(new DeleteObjectCommand({ Bucket, Key }));
+      await this.s3
+        .deleteObject({
+          Bucket,
+          Key,
+        })
+        .promise();
     } catch (error) {
-      console.error('Error deleting file from S3:', error);
       throw new Error('Failed to delete file');
     }
   }
@@ -71,8 +79,9 @@ export class ProductService {
     imageUrl: any,
     otherImages: any,
   ): Promise<Product> {
-    const { productType } = createProductDto;
+    const { productType, subcategory } = createProductDto;
     await this.typeService.findOne(productType);
+    await this.subcategoryService.findOne(subcategory);
 
     const newProduct = new this.productModel({
       ...createProductDto,
@@ -151,18 +160,34 @@ export class ProductService {
     id: string,
     updateProductDto: UpdateProductDto,
     newImages: any,
+    imageUrl?: string,
   ): Promise<Product> {
     const product = await this.productModel.findById(id);
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
+    if (updateProductDto.productType) {
+      await this.typeService.findOne(updateProductDto.productType);
+    }
+
+    if (updateProductDto.subcategory) {
+      await this.subcategoryService.findOne(updateProductDto.subcategory);
+    }
+
+    const mergedOtherImages = [
+      ...(product.otherImages || []),
+      ...(updateProductDto.otherImages || []),
+      ...(newImages || []),
+    ];
+
     const updated = await this.productModel
       .findByIdAndUpdate(
         id,
         {
           ...updateProductDto,
-          otherImages: [...(newImages || []), ...product.otherImages],
+          ...(imageUrl ? { imageUrl } : {}),
+          otherImages: mergedOtherImages,
         },
         { new: true },
       )
@@ -181,7 +206,7 @@ export class ProductService {
       );
 
       // Call AWS S3 to delete the images from the bucket
-      const res = await this.deleteFilesFromUrls(updateProductDto.deleteImages);
+      await this.deleteFilesFromUrls(updateProductDto.deleteImages);
 
       await updated.save();
     }
@@ -390,7 +415,7 @@ export class ProductService {
   }
 
   async fetchProductBySlug(slug: string): Promise<Product | null> {
-    return this.productModel
+    const product = await this.productModel
       .findOne({ slug })
       .populate({
         path: 'subcategory',
@@ -401,5 +426,11 @@ export class ProductService {
         },
       })
       .populate('productType');
+
+    if (!product) {
+      throw new NotFoundException(`Product with slug ${slug} not found`);
+    }
+
+    return product;
   }
 }

@@ -13,11 +13,11 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
 
-@UseGuards(AdminAuthGuard)
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @UseGuards(AdminAuthGuard)
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
@@ -33,6 +33,7 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
+  @UseGuards(AdminAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -41,6 +42,7 @@ export class CategoryController {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
+  @UseGuards(AdminAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.categoryService.remove(id);

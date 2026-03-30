@@ -8,15 +8,18 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { TypeService } from './type.service';
 import { CreateTypeDto } from './dto/create-type.dto';
 import { UpdateTypeDto } from './dto/update-type.dto';
+import { AdminAuthGuard } from '../auth/guard/admin.guard';
 
 @Controller('types')
 export class TypeController {
   constructor(private readonly typeService: TypeService) {}
 
+  @UseGuards(AdminAuthGuard)
   @Post()
   async create(@Body() createDto: CreateTypeDto) {
     const type = await this.typeService.create(createDto);
@@ -26,6 +29,7 @@ export class TypeController {
     };
   }
 
+  @UseGuards(AdminAuthGuard)
   @Post('bulk')
   async createMany(@Body() createDtos: CreateTypeDto[]) {
     const types = await this.typeService.createMany(createDtos);
@@ -73,6 +77,7 @@ export class TypeController {
     };
   }
 
+  @UseGuards(AdminAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateDto: UpdateTypeDto) {
     const updated = await this.typeService.update(id, updateDto);
@@ -82,6 +87,7 @@ export class TypeController {
     };
   }
 
+  @UseGuards(AdminAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string) {
@@ -90,6 +96,8 @@ export class TypeController {
 
   @Get('/by-subcategory/:subcategoryId')
   async findBySubcategory(@Param('subcategoryId') subcategoryId: string) {
-    return await this.typeService.findBySubcategory(subcategoryId);
+    return {
+      data: await this.typeService.findBySubcategory(subcategoryId),
+    };
   }
 }

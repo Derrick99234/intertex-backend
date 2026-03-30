@@ -3,10 +3,13 @@ import { Document, Types } from 'mongoose';
 import { User } from './user.schema';
 import { Product } from './product.schema';
 
-@Schema({ timestamps: true })
+@Schema({ _id: false })
 export class ProductItem {
   @Prop({ type: Types.ObjectId, ref: Product.name, required: true })
-  productId: Types.ObjectId;
+  product: Types.ObjectId;
+
+  @Prop({ required: true })
+  productName: string;
 
   @Prop({ required: true })
   quantity: number;
@@ -27,19 +30,18 @@ export class Order extends Document {
     type: {
       deliveryAddress: { type: String, required: true },
       phoneNumber: { type: String, required: true },
+      alternativePhoneNumber: { type: String, required: false },
     },
     required: true,
   })
   deliveryInformation: {
     deliveryAddress: string;
     phoneNumber: string;
+    alternativePhoneNumber?: string;
   };
 
   @Prop({ required: true })
   amount: number;
-
-  @Prop({ type: Date, default: Date.now })
-  date: Date;
 
   @Prop({
     type: String,

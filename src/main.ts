@@ -1,17 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { MongooseExceptionFilter } from './common/decorators/mongoose-exception.decorator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+      : true,
     credentials: true,
-  });
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'api/v',
   });
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,6 +26,6 @@ async function bootstrap() {
   // await userService.generateFakeUsers(100);
 
   const port = process.env.PORT || 3000;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port);
 }
 bootstrap();

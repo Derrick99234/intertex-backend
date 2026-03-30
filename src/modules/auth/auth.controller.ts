@@ -8,20 +8,15 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    const user = await this.authService.createUser(createUserDto);
+    await this.authService.createUser(createUserDto);
     return {
-      message: 'User registered successfully',
-      user,
+      message: 'User created successfully',
     };
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
-    const result = await this.authService.authenticate(body);
-    return {
-      message: 'Login successful',
-      ...result,
-    };
+    return this.authService.authenticate(body);
   }
 }

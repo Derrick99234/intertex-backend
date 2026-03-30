@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { BillingInformation } from '../../schemas/billing-information.schema';
 import { CreateBillingInformationDto } from './dto/create-billing-information.dto';
 import { UpdateBillingInformationDto } from './dto/update-billing-information.dto';
@@ -12,11 +12,11 @@ export class BillingInformationService {
     private readonly billingModel: Model<BillingInformation>,
   ) {}
 
-  async create(data: CreateBillingInformationDto) {
+  async create(userId: string, data: CreateBillingInformationDto) {
     if (data.isDefault === true) {
       await this.billingModel.updateMany(
         {
-          user: data.user,
+          user: userId,
         },
         {
           $set: { isDefault: false },
@@ -24,29 +24,21 @@ export class BillingInformationService {
       );
     }
 
-    const billing = new this.billingModel(data);
+    const billing = new this.billingModel({ ...data, user: userId });
     return billing.save();
   }
 
-  async findAll() {
-    return this.billingModel.find().populate('user', 'email fullName').exec();
-  }
-
-  async findOne(id: string) {
-    const billing = await this.billingModel
-      .findById(new Types.ObjectId(id))
-      .populate('user', 'email fullName')
+  async findAll(userId: string) {
+    return this.billingModel
+      .find({ user: userId })
+      .sort({ createdAt: -1 })
       .exec();
-
-    if (!billing)
-      throw new NotFoundException(`Billing info with ID ${id} not found`);
-    return billing;
   }
 
-  async update(id: string, data: UpdateBillingInformationDto) {
+  async update(userId: string, id: string, data: UpdateBillingInformationDto) {
     // If this address is being set as default
     if (data.isDefault === true) {
-      const billing = await this.billingModel.findById(id).exec();
+      const billing = await this.billingModel.findOne({ _id: id, user: userId }).exec();
 
       if (!billing) {
         throw new NotFoundException(`Billing info with ID ${id} not found`);
@@ -64,7 +56,7 @@ export class BillingInformationService {
 
     // Update the selected address
     const updatedBilling = await this.billingModel
-      .findByIdAndUpdate(id, data, { new: true })
+      .findOneAndUpdate({ _id: id, user: userId }, data, { new: true })
       .exec();
 
     if (!updatedBilling) {
@@ -72,12 +64,5 @@ export class BillingInformationService {
     }
 
     return updatedBilling;
-  }
-
-  async remove(id: string) {
-    const billing = await this.billingModel.findByIdAndDelete(id).exec();
-    if (!billing)
-      throw new NotFoundException(`Billing info with ID ${id} not found`);
-    return { message: 'Billing info deleted successfully' };
   }
 }

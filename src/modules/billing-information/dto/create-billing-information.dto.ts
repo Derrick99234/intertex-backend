@@ -1,28 +1,25 @@
 import {
-  IsMongoId,
+  IsBoolean,
   IsOptional,
   IsString,
-  IsPhoneNumber,
 } from 'class-validator';
 
 export class CreateBillingInformationDto {
-  @IsMongoId()
-  user: string;
-
   @IsString()
   deliveryAddress: string;
 
   @IsString()
-  region: string;
+  country: string;
 
   @IsString()
-  city: string;
+  state: string;
 
   @IsOptional()
   @IsString()
   additionalInformation?: string;
 
   @IsOptional()
+  @IsString()
   secondPhoneNumber?: string;
 
   @IsString()
@@ -32,5 +29,6 @@ export class CreateBillingInformationDto {
   fullName: string;
 
   @IsOptional()
-  isDefault: boolean;
+  @IsBoolean()
+  isDefault?: boolean;
 }
