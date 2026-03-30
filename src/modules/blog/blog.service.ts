@@ -20,7 +20,7 @@ export class BlogPostService {
   }
 
   async findAll(): Promise<BlogPost[]> {
-    return this.postModel.find().exec();
+    return this.postModel.find().sort({ createdAt: -1 }).exec();
   }
 
   async findOne(id: string): Promise<BlogPost> {

@@ -12,7 +12,7 @@ export class BlogPost {
   tags: string[];
 
   @Prop({ required: true })
-  description: string;
+  content: string;
 
   @Prop()
   slug: string;

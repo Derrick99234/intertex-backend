@@ -9,13 +9,10 @@ export class PaystackController {
   async initialize(
     @Body() body: { email: string; amount: number; metadata: any },
   ) {
-    const callbackUrl = 'http://localhost:3000/payment-success';
-
     return this.paystackService.initializeTransaction(
       body.email,
       body.amount,
       body.metadata,
-      callbackUrl,
     );
   }
 

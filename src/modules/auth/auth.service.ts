@@ -2,11 +2,13 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { ConfigService } from '@nestjs/config';
 
 type AuthInput = {
   email: string;
@@ -19,7 +21,6 @@ type SignInPayload = {
 
 type AuthResult = {
   accessToken: string;
-  userId: string;
 };
 
 @Injectable()
@@ -27,9 +28,15 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async createUser(createUserDto: CreateUserDto) {
+    const existingUser = await this.userService.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
+
     return this.userService.createUser(createUserDto);
   }
 
@@ -62,11 +69,13 @@ export class AuthService {
       sub: user.userId,
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('jwt.secret'),
+      expiresIn: '1d',
+    });
 
     return {
       accessToken,
-      userId: user.userId,
     };
   }
 }

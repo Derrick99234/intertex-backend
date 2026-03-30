@@ -1,17 +1,21 @@
 import {
-  IsString,
+  IsArray,
   IsNotEmpty,
   IsNumber,
-  IsArray,
-  ValidateNested,
   IsOptional,
+  IsString,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ProductItemDto {
   @IsString()
   @IsNotEmpty()
-  productId: string;
+  product: string;
+
+  @IsOptional()
+  @IsString()
+  productName?: string;
 
   @IsNumber()
   quantity: number;
@@ -21,20 +25,29 @@ class ProductItemDto {
   size?: string;
 }
 
-export class CreateOrderDto {
+class DeliveryInformationDto {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  deliveryAddress: string;
 
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @IsOptional()
+  @IsString()
+  alternativePhoneNumber?: string;
+}
+
+export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   deliveryMethod: string;
 
   @IsNotEmpty()
-  deliveryInformation: {
-    deliveryAddress: string;
-    phoneNumber: string;
-  };
+  @ValidateNested()
+  @Type(() => DeliveryInformationDto)
+  deliveryInformation: DeliveryInformationDto;
 
   @IsNumber()
   amount: number;

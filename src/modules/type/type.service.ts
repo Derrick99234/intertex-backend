@@ -67,7 +67,7 @@ export class TypeService {
         .map((order) => {
           // Ensure productId is converted to ObjectId only if it's not already an ObjectId
           order.products = order.products.map((productItem) => {
-            const productId = productItem.productId;
+            const productId = productItem.product;
             if (
               productId &&
               typeof productId === 'string' &&
@@ -92,7 +92,7 @@ export class TypeService {
       for (const order of successfulOrders) {
         // Step 4: Loop through each product in the order
         for (const productItem of order.products) {
-          const productId = productItem.productId;
+          const productId = productItem.product;
 
           // Step 5: Ensure productId is a valid ObjectId before querying Product
           if (!Types.ObjectId.isValid(productId)) {

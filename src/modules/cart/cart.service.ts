@@ -12,7 +12,7 @@ export class CartService {
   async getCart(userId: string) {
     let cart = await this.cartModel.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price images slug imageUrl',
+      select: 'productName price slug imageUrl otherImages',
     });
 
     if (!cart) {
@@ -42,7 +42,7 @@ export class CartService {
     const savedCart = await cart.save();
     return savedCart.populate({
       path: 'items.product',
-      select: 'name price images slug imageUrl', // only keep these fields
+      select: 'productName price slug imageUrl otherImages',
     });
   }
 
@@ -61,7 +61,7 @@ export class CartService {
     const savedCart = await cart.save();
     return savedCart.populate({
       path: 'items.product',
-      select: 'name price images slug imageUrl', // only keep these fields
+      select: 'productName price slug imageUrl otherImages',
     });
   }
 
@@ -79,7 +79,7 @@ export class CartService {
     const savedCart = await cart.save();
     return savedCart.populate({
       path: 'items.product',
-      select: 'name price images slug imageUrl', // only keep these fields
+      select: 'productName price slug imageUrl otherImages',
     });
   }
 

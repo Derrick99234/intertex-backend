@@ -6,12 +6,14 @@ import {
 } from '../../schemas/billing-information.schema';
 import { BillingInformationService } from './billing-information.service';
 import { BillingInformationController } from './billing-information.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: BillingInformation.name, schema: BillingInformationSchema },
     ]),
+    AuthModule,
   ],
   providers: [BillingInformationService],
   controllers: [BillingInformationController],

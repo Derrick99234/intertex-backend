@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsOptional,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -45,7 +46,7 @@ export class CreateProductDto {
   inStock: SizeQuantityDto[];
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   offer: string;
 
   @IsString()
@@ -55,6 +56,15 @@ export class CreateProductDto {
   @Type(() => Number)
   @IsNumber()
   ratings: number;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  otherImages?: string[];
 
   //   @IsString()
   //   @IsNotEmpty()

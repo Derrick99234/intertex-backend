@@ -2,7 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
 import { User } from './user.schema';
 
-@Schema()
+@Schema({ timestamps: true })
 export class BillingInformation extends Document {
   @Prop({ type: SchemaTypes.ObjectId, ref: User.name })
   user: Types.ObjectId;
@@ -11,13 +11,13 @@ export class BillingInformation extends Document {
   deliveryAddress: string;
 
   @Prop()
-  region: string;
+  country: string;
 
   @Prop()
-  city: string;
+  state: string;
 
   @Prop()
-  addtionalInformation: string;
+  additionalInformation: string;
 
   @Prop()
   secondPhoneNumber: string;

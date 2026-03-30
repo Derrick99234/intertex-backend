@@ -6,10 +6,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -21,9 +25,12 @@ export class AdminAuthGuard implements CanActivate {
     }
 
     try {
-      const tokenPayload = await this.jwtService.verifyAsync(token);
+      const tokenPayload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('jwt.adminSecret'),
+      });
       request.user = {
         userId: tokenPayload.sub,
+        role: tokenPayload.role,
       };
 
       return true;

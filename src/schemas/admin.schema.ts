@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AdminRoles } from '../common/utils/enums.utils';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Admin {
+export class Admin extends Document {
   @Prop({ required: true })
   firstName: string;
 
@@ -20,6 +21,18 @@ export class Admin {
 
   @Prop({ required: true, select: false })
   password: string;
+
+  @Prop({ select: false })
+  passwordResetOtp?: string;
+
+  @Prop({ select: false })
+  passwordResetOtpExpiresAt?: Date;
+
+  @Prop({ select: false })
+  passwordResetToken?: string;
+
+  @Prop({ select: false })
+  passwordResetTokenExpiresAt?: Date;
 }
 
 export const AdminSchema = SchemaFactory.createForClass(Admin);
