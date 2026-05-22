@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { BlogPost, BlogPostDocument } from '../../schemas/blog.schema';
 import { CreateBlogPostDto } from './dto/create-blog.dto';
 import { UpdateBlogPostDto } from './dto/update-blog.dto';
+import { PaginationQuery, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
 @Injectable()
 export class BlogPostService {
   constructor(
@@ -19,8 +20,13 @@ export class BlogPostService {
     return newPost.save();
   }
 
-  async findAll(): Promise<BlogPost[]> {
-    return this.postModel.find().sort({ createdAt: -1 }).exec();
+  async findAll(query: PaginationQuery = {}) {
+    const { page, limit, skip } = parsePagination(query, 10);
+    const [data, total] = await Promise.all([
+      this.postModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+      this.postModel.countDocuments(),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
   async findOne(id: string): Promise<BlogPost> {

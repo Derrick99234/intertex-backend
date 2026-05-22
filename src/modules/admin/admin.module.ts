@@ -8,6 +8,7 @@ import { UserModule } from '../user/user.module';
 import { Promotion, PromotionSchema } from '../../schemas/promotion.schema';
 import { Feedback, FeedbackSchema } from '../../schemas/feedback.schema';
 import { Order, OrderSchema } from '../../schemas/order';
+import { EmailService } from '../../common/utils/email.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { Order, OrderSchema } from '../../schemas/order';
     UserModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, EmailService],
   exports: [AdminService],
 })
 export class AdminModule {}

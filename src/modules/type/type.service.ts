@@ -62,7 +62,7 @@ export class TypeService {
   async updateTotalSold() {
     try {
       // Step 1: Get all successful orders and populate productId
-      const successfulOrders = (await this.orderService.findAll())
+      const successfulOrders = (await this.orderService.findAll()).data
         .filter((order) => order.status === 'successful')
         .map((order) => {
           // Ensure productId is converted to ObjectId only if it's not already an ObjectId

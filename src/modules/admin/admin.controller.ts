@@ -6,8 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { Response } from 'express';
 import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
@@ -23,16 +26,27 @@ import { UpdatePromotionDto } from './dto/update-promotion.dto';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @UseGuards(AdminAuthGuard)
   @Post('create')
   async createAdmin() {
     return this.adminService.createSuperAdmin();
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
-  async login(@Body() loginDto: AdminLoginDto) {
-    return this.adminService.login(loginDto.email, loginDto.password);
+  async login(@Body() loginDto: AdminLoginDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.adminService.login(loginDto.email, loginDto.password);
+    res.cookie('adminToken', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    return result;
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('password-reset/request')
   async requestPasswordReset(
     @Body() dto: RequestAdminPasswordResetDto,
@@ -40,6 +54,7 @@ export class AdminController {
     return this.adminService.requestPasswordReset(dto.email);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('password-reset/verify-otp')
   async verifyPasswordResetOtp(
     @Body() dto: VerifyAdminPasswordResetOtpDto,
@@ -47,6 +62,7 @@ export class AdminController {
     return this.adminService.verifyPasswordResetOtp(dto.email, dto.otp);
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('password-reset/resend-otp')
   async resendPasswordResetOtp(
     @Body() dto: RequestAdminPasswordResetDto,
@@ -54,11 +70,13 @@ export class AdminController {
     return this.adminService.resendPasswordResetOtp(dto.email);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetAdminPasswordDto) {
     return this.adminService.resetPassword(dto.token, dto.newPassword);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('reset-password/:token')
   async resetPasswordWithParam(
     @Param('token') token: string,
@@ -68,6 +86,7 @@ export class AdminController {
   }
 
   @UseGuards(AdminAuthGuard)
+  @SkipThrottle()
   @Get('users')
   async getAllUsers() {
     return this.adminService.getDashboardUsers();

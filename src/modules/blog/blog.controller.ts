@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
   UploadedFiles,
   UseInterceptors,
   UseGuards,
@@ -17,6 +18,7 @@ import { UpdateBlogPostDto } from './dto/update-blog.dto';
 import { awsOption } from '../../configs/aws-s3.config';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
+import { PaginationQuery } from '../../common/utils/pagination.util';
 
 @Controller('blog')
 export class BlogPostController {
@@ -45,8 +47,8 @@ export class BlogPostController {
   }
 
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  findAll(@Query() query: PaginationQuery) {
+    return this.postService.findAll(query);
   }
 
   @Get('slug/:slug')

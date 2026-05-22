@@ -1,9 +1,11 @@
 import { Controller, Get, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 
+@SkipThrottle()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -15,6 +17,7 @@ export class UserController {
     return this.userService.findOne(userId);
   }
 
+  @UseGuards(AuthGuard)
   @Get('/:id')
   getUserByID(@Param('id') userId: string) {
     return this.userService.findOne(userId);

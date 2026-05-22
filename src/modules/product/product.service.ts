@@ -13,6 +13,7 @@ import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
 import * as AWS from 'aws-sdk';
+import { PaginationQuery, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
 
 @Injectable()
 export class ProductService {
@@ -123,18 +124,25 @@ export class ProductService {
     }
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel
-      .find()
-      .populate({
-        path: 'subcategory',
-        populate: {
-          path: 'category',
-          select: 'name slug',
-        },
-      })
-      .populate('productType')
-      .sort({ createdAt: -1 });
+  async findAll(query: PaginationQuery = {}) {
+    const { page, limit, skip } = parsePagination(query);
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'subcategory',
+          populate: {
+            path: 'category',
+            select: 'name slug',
+          },
+        })
+        .populate('productType')
+        .sort({ createdAt: -1 }),
+      this.productModel.countDocuments(),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
   async findOne(id: string): Promise<Product> {
@@ -232,6 +240,8 @@ export class ProductService {
       minPrice?: number;
       maxPrice?: number;
       sort?: 'newest' | 'price_asc' | 'price_desc';
+      page?: number;
+      limit?: number;
     },
   ): Promise<Product[]> {
     // Case-insensitive partial match for keyword
@@ -315,9 +325,15 @@ export class ProductService {
     // 🧠 Debugging logs
 
     // Fetch results
+    const { page, limit, skip } = parsePagination(
+      { page: filters?.page, limit: filters?.limit },
+      12,
+    );
     const results = await this.productModel
       .find(filterQuery)
       .sort(sortQuery)
+      .skip(skip)
+      .limit(limit)
       .populate({
         path: 'subcategory',
         populate: {
@@ -347,45 +363,61 @@ export class ProductService {
       .populate('productType');
   }
 
-  async fetchProductsByCategory(slug: string): Promise<Product[]> {
+  async fetchProductsByCategory(slug: string, query: PaginationQuery = {}) {
     const category = await this.categoryService.findOneBySlug(slug);
     const subcategories = await this.subcategoryService.findByCategory(
       category._id as unknown as string,
     );
     const subcategoryIds = subcategories.map((sub) => sub._id);
+    const { page, limit, skip } = parsePagination(query);
 
-    return this.productModel
-      .find({ subcategory: { $in: subcategoryIds } })
-      .populate({
-        path: 'subcategory',
-        populate: {
-          path: 'category',
-          model: 'Category',
-          select: 'name slug',
-        },
-      })
-      .populate('productType');
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find({ subcategory: { $in: subcategoryIds } })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'subcategory',
+          populate: {
+            path: 'category',
+            model: 'Category',
+            select: 'name slug',
+          },
+        })
+        .populate('productType'),
+      this.productModel.countDocuments({ subcategory: { $in: subcategoryIds } }),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
-  async fetchProductsByType(slug: string): Promise<Product[]> {
+  async fetchProductsByType(slug: string, query: PaginationQuery = {}) {
     const type = await this.typeService.findOneBySlug(slug);
-    return this.productModel
-      .find({ productType: type._id })
-      .populate({
-        path: 'subcategory',
-        populate: {
-          path: 'category',
-          model: 'Category',
-          select: 'name slug',
-        },
-      })
-      .populate('productType');
+    const { page, limit, skip } = parsePagination(query);
+
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find({ productType: type._id })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'subcategory',
+          populate: {
+            path: 'category',
+            model: 'Category',
+            select: 'name slug',
+          },
+        })
+        .populate('productType'),
+      this.productModel.countDocuments({ productType: type._id }),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
   async fetchProductsBySubcategory(
     categorySlug: string,
     subcategorySlug: string,
-  ): Promise<Product[]> {
+    query: PaginationQuery = {},
+  ) {
     const category = await this.categoryService.findOneBySlug(categorySlug);
     const subcategories = await this.subcategoryService.findByCategory(
       category._id.toString(),
@@ -401,17 +433,25 @@ export class ProductService {
         `Subcategory with slug ${subcategorySlug} not found under category ${categorySlug}`,
       );
     }
-    return this.productModel
-      .find({ subcategory: subcategory._id })
-      .populate({
-        path: 'subcategory',
-        populate: {
-          path: 'category',
-          model: 'Category',
-          select: 'name slug',
-        },
-      })
-      .populate('productType');
+    const { page, limit, skip } = parsePagination(query);
+
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find({ subcategory: subcategory._id })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'subcategory',
+          populate: {
+            path: 'category',
+            model: 'Category',
+            select: 'name slug',
+          },
+        })
+        .populate('productType'),
+      this.productModel.countDocuments({ subcategory: subcategory._id }),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
   async fetchProductBySlug(slug: string): Promise<Product | null> {

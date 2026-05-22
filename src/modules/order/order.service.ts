@@ -6,6 +6,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from '../../schemas/order';
 import { CartService } from '../cart/cart.service';
 import { ProductService } from '../product/product.service';
+import { PaginationQuery, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
 
 @Injectable()
 export class OrdersService {
@@ -46,23 +47,36 @@ export class OrdersService {
     return this.findOne(savedOrder._id.toString());
   }
 
-  async findAll(): Promise<Order[]> {
-    return this.orderModel
-      .find()
-      .populate('userId', 'fullName email')
-      .populate('products.product', 'productName price imageUrl slug')
-      .sort({ createdAt: -1 })
-      .exec();
+  async findAll(query: PaginationQuery = {}) {
+    const { page, limit, skip } = parsePagination(query);
+    const [data, total] = await Promise.all([
+      this.orderModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'fullName email')
+        .populate('products.product', 'productName price imageUrl slug')
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.orderModel.countDocuments(),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
-  // New method to find orders by userId
-  async findAllByUser(userId: string): Promise<Order[]> {
-    return this.orderModel
-      .find({ userId }) // Filter orders by userId
-      .populate('userId', 'fullName email')
-      .populate('products.product', 'productName price imageUrl slug')
-      .sort({ createdAt: -1 })
-      .exec();
+  async findAllByUser(userId: string, query: PaginationQuery = {}) {
+    const { page, limit, skip } = parsePagination(query);
+    const [data, total] = await Promise.all([
+      this.orderModel
+        .find({ userId })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'fullName email')
+        .populate('products.product', 'productName price imageUrl slug')
+        .sort({ createdAt: -1 })
+        .exec(),
+      this.orderModel.countDocuments({ userId }),
+    ]);
+    return paginatedResult(data, total, page, limit);
   }
 
   async findOne(id: string): Promise<Order> {

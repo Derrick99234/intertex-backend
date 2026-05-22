@@ -20,6 +20,7 @@ import { randomInt } from 'crypto';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { SendAdminEmailDto } from './dto/send-admin-email.dto';
+import { EmailService } from '../../common/utils/email.service';
 
 @Injectable()
 export class AdminService {
@@ -34,6 +35,7 @@ export class AdminService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createSuperAdmin(): Promise<Admin> {
@@ -133,10 +135,10 @@ export class AdminService {
     admin.passwordResetTokenExpiresAt = undefined;
     await admin.save();
 
+    await this.emailService.sendPasswordResetOtp(email, otp);
+
     return {
-      message: this.configService.get<string>('email.from')
-        ? 'Password reset OTP sent successfully'
-        : 'Password reset OTP generated. Configure email delivery to send live OTPs.',
+      message: 'Password reset OTP sent successfully',
     };
   }
 
@@ -237,13 +239,18 @@ export class AdminService {
         ? await this.userService.findAll()
         : await this.userService.findAll();
 
+    for (const user of recipients) {
+      await this.emailService.sendCampaignEmail({
+        to: user.email,
+        subject: dto.subject,
+        html: dto.message,
+      });
+    }
+
     return {
-      message: 'Email campaign queued successfully',
+      message: 'Email campaign completed successfully',
       audience: dto.audience,
       recipientCount: recipients.length,
-      delivery: this.configService.get<string>('email.from')
-        ? 'stubbed-send'
-        : 'not-configured',
     };
   }
 

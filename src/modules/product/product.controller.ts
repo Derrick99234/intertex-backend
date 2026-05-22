@@ -22,6 +22,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { awsOption } from '../../configs/aws-s3.config';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
 import { validateDto } from '../../common/utils/dto-validation.util';
+import { PaginationQuery } from '../../common/utils/pagination.util';
 @Controller('products')
 export class ProductController {
   constructor(
@@ -79,18 +80,16 @@ export class ProductController {
   }
 
   @Get()
-  async findAll() {
-    const products = await this.productService.findAll();
-    return {
-      message: 'All products retrieved',
-      products,
-    };
+  async findAll(@Query() query: PaginationQuery) {
+    return this.productService.findAll(query);
   }
 
   @Get('search')
   async searchProducts(
     @Query('keyword') keyword: string,
     @Query('sort') sort: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
     @Query('category') categorySlug?: string,
     @Query('subcategory') subcategorySlug?: string,
     @Query('productType') productTypeSlug?: string,
@@ -104,6 +103,8 @@ export class ProductController {
       minPrice,
       maxPrice,
       sort: sort as 'newest' | 'price_asc' | 'price_desc',
+      page,
+      limit,
     };
 
     const products = await this.productService.searchProducts(keyword, filters);
@@ -168,36 +169,32 @@ export class ProductController {
   }
 
   @Get('category/:slug')
-  async fetchProductsByCategory(@Param('slug') slug: string) {
-    const products = await this.productService.fetchProductsByCategory(slug);
-    return {
-      message: 'Products by category retrieved successfully',
-      products,
-    };
+  async fetchProductsByCategory(
+    @Param('slug') slug: string,
+    @Query() query: PaginationQuery,
+  ) {
+    return this.productService.fetchProductsByCategory(slug, query);
   }
 
   @Get('type/:slug')
-  async fetchProductsByType(@Param('slug') slug: string) {
-    const products = await this.productService.fetchProductsByType(slug);
-    return {
-      message: 'Products by type retrieved successfully',
-      products,
-    };
+  async fetchProductsByType(
+    @Param('slug') slug: string,
+    @Query() query: PaginationQuery,
+  ) {
+    return this.productService.fetchProductsByType(slug, query);
   }
 
   @Get('subcategory/:catSlug/:subSlug')
   async fetchProductsBySubcategory(
     @Param('catSlug') categoryId: string,
     @Param('subSlug') subcategoryId: string,
+    @Query() query: PaginationQuery,
   ) {
-    const products = await this.productService.fetchProductsBySubcategory(
+    return this.productService.fetchProductsBySubcategory(
       categoryId,
       subcategoryId,
+      query,
     );
-    return {
-      message: 'Products by subcategory retrieved successfully',
-      products,
-    };
   }
 
   @Get('product/:productSlug')
