@@ -10,7 +10,9 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
-      : true,
+      : process.env.NODE_ENV === 'production'
+        ? 'https://intertex.vercel.app'
+        : true,
     credentials: true,
   });
   app.useGlobalPipes(

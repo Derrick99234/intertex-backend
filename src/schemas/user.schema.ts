@@ -25,7 +25,7 @@ export class User extends Document {
   @Prop()
   email: string;
 
-  @Prop()
+  @Prop({ select: false })
   password: string;
 
   @Prop()
@@ -45,6 +45,18 @@ export class User extends Document {
 
   @Prop({ default: false })
   isActive: boolean;
+
+  @Prop({ select: false })
+  passwordResetOtp?: string;
+
+  @Prop({ select: false })
+  passwordResetOtpExpiresAt?: Date;
+
+  @Prop({ select: false })
+  passwordResetToken?: string;
+
+  @Prop({ select: false })
+  passwordResetTokenExpiresAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

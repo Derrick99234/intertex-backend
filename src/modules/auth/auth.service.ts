@@ -3,12 +3,18 @@ import {
   UnauthorizedException,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { randomInt } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../../schemas/user.schema';
+import { EmailService } from '../../common/utils/email.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 type AuthInput = {
   email: string;
@@ -26,9 +32,11 @@ type AuthResult = {
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createUser(createUserDto: CreateUserDto) {
@@ -49,7 +57,11 @@ export class AuthService {
   }
 
   private async validateUser(input: AuthInput): Promise<SignInPayload | null> {
-    const user = await this.userService.findByEmail(input.email);
+    const user = await this.userModel
+      .findOne({ email: input.email.toLowerCase() })
+      .select('+password')
+      .exec();
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -76,6 +88,132 @@ export class AuthService {
 
     return {
       accessToken,
+    };
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.userModel
+      .findOne({ email: email.toLowerCase() })
+      .select('+passwordResetOtp +passwordResetOtpExpiresAt')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('Account not found');
+    }
+
+    const otp = `${randomInt(100000, 999999)}`;
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    user.passwordResetOtp = hashedOtp;
+    user.passwordResetOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiresAt = undefined;
+    await user.save();
+
+    await this.emailService.sendPasswordResetOtp(email, otp);
+
+    return {
+      message: 'Password reset OTP sent successfully',
+    };
+  }
+
+  async resendPasswordResetOtp(email: string) {
+    await this.requestPasswordReset(email);
+    return {
+      message: 'Password reset OTP resent successfully',
+    };
+  }
+
+  async verifyPasswordResetOtp(email: string, otp: string) {
+    const user = await this.userModel
+      .findOne({ email: email.toLowerCase() })
+      .select(
+        '+passwordResetOtp +passwordResetOtpExpiresAt +passwordResetToken +passwordResetTokenExpiresAt',
+      )
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('Account not found');
+    }
+
+    if (!user.passwordResetOtp || !user.passwordResetOtpExpiresAt) {
+      throw new BadRequestException('No password reset OTP found');
+    }
+
+    if (user.passwordResetOtpExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const isOtpMatch = await bcrypt.compare(otp, user.passwordResetOtp);
+    if (!isOtpMatch) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    const resetToken = await this.jwtService.signAsync(
+      { sub: user._id.toString(), purpose: 'user-reset' },
+      {
+        secret:
+          this.configService.get<string>('jwt.resetSecret') ||
+          this.configService.get<string>('jwt.secret'),
+        expiresIn: '15m',
+      },
+    );
+
+    user.passwordResetOtp = undefined;
+    user.passwordResetOtpExpiresAt = undefined;
+    user.passwordResetToken = await bcrypt.hash(resetToken, 10);
+    user.passwordResetTokenExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
+
+    return { resetToken };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    let decoded: { sub: string; purpose?: string };
+    try {
+      decoded = await this.jwtService.verifyAsync(token, {
+        secret:
+          this.configService.get<string>('jwt.resetSecret') ||
+          this.configService.get<string>('jwt.secret'),
+      });
+    } catch {
+      throw new BadRequestException('Reset token is invalid or expired');
+    }
+
+    if (decoded.purpose && decoded.purpose !== 'user-reset') {
+      throw new BadRequestException('Invalid reset token');
+    }
+
+    const user = await this.userModel
+      .findById(decoded.sub)
+      .select('+password +passwordResetToken +passwordResetTokenExpiresAt')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('Account not found');
+    }
+
+    if (!user.passwordResetToken || !user.passwordResetTokenExpiresAt) {
+      throw new BadRequestException('Reset token is invalid');
+    }
+
+    if (user.passwordResetTokenExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    const isTokenMatch = await bcrypt.compare(token, user.passwordResetToken);
+    if (!isTokenMatch) {
+      throw new BadRequestException('Reset token is invalid');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiresAt = undefined;
+    user.passwordResetOtp = undefined;
+    user.passwordResetOtpExpiresAt = undefined;
+    await user.save();
+
+    return {
+      message: 'Password reset successfully',
     };
   }
 }

@@ -129,7 +129,8 @@ export class AdminService {
     }
 
     const otp = this.generateOtp();
-    admin.passwordResetOtp = otp;
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    admin.passwordResetOtp = hashedOtp;
     admin.passwordResetOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     admin.passwordResetToken = undefined;
     admin.passwordResetTokenExpiresAt = undefined;
@@ -168,7 +169,8 @@ export class AdminService {
       throw new BadRequestException('OTP has expired');
     }
 
-    if (admin.passwordResetOtp !== otp) {
+    const isOtpMatch = await bcrypt.compare(otp, admin.passwordResetOtp);
+    if (!isOtpMatch) {
       throw new BadRequestException('Invalid OTP');
     }
 
