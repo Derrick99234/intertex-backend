@@ -44,6 +44,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   deliveryMethod: string;
 
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => DeliveryInformationDto)

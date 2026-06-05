@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PaystackService } from './paystack.service';
+import { PaystackInitializeDto } from './paystack.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
 
 @SkipThrottle()
@@ -10,9 +11,7 @@ export class PaystackController {
 
   @UseGuards(AuthGuard)
   @Post('initialize')
-  async initialize(
-    @Body() body: { email: string; amount: number; metadata: any },
-  ) {
+  async initialize(@Body() body: PaystackInitializeDto) {
     return this.paystackService.initializeTransaction(
       body.email,
       body.amount,

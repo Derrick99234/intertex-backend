@@ -26,6 +26,9 @@ export class Order extends Document {
   @Prop({ required: true })
   deliveryMethod: string;
 
+  @Prop({ required: false })
+  currency?: string;
+
   @Prop({
     type: {
       deliveryAddress: { type: String, required: true },
