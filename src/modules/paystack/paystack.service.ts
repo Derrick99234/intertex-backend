@@ -13,7 +13,9 @@ export class PaystackService {
     metadata: Record<string, any>,
   ) {
     const secretKey = this.configService.get<string>('paystack.secretKey');
-    const callbackUrl = this.configService.get<string>('paystack.callbackUrl');
+    const callbackUrl =
+      this.configService.get<string>('paystack.callbackUrl') ||
+      'https://intertex.vercel.app/payment-success';
 
     if (!secretKey) {
       return {

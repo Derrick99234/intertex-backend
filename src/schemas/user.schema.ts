@@ -22,7 +22,7 @@ export class User extends Document {
   @Prop()
   gender: string;
 
-  @Prop()
+  @Prop({ index: true })
   email: string;
 
   @Prop({ select: false })
@@ -46,7 +46,7 @@ export class User extends Document {
   @Prop({ default: false })
   isActive: boolean;
 
-  @Prop({ select: false })
+  @Prop({ select: false, index: true })
   passwordResetOtp?: string;
 
   @Prop({ select: false })

@@ -47,6 +47,7 @@ export class Product extends Document {
     type: MongooseSchema.Types.ObjectId,
     ref: ProductType.name,
     required: true,
+    index: true,
   })
   productType: Types.ObjectId;
 
@@ -54,6 +55,7 @@ export class Product extends Document {
     type: MongooseSchema.Types.ObjectId,
     ref: Subcategory.name,
     required: true,
+    index: true,
   })
   subcategory: Types.ObjectId;
 }

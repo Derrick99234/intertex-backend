@@ -20,7 +20,7 @@ export class ProductItem {
 
 @Schema({ timestamps: true })
 export class Order extends Document {
-  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true, index: true })
   userId: Types.ObjectId;
 
   @Prop({ required: true })
@@ -50,6 +50,7 @@ export class Order extends Document {
     type: String,
     enum: ['pending', 'successful', 'cancelled'],
     default: 'pending',
+    index: true,
   })
   status: string;
 

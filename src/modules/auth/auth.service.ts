@@ -27,6 +27,7 @@ type SignInPayload = {
 
 type AuthResult = {
   accessToken: string;
+  refreshToken: string;
 };
 
 @Injectable()
@@ -77,18 +78,49 @@ export class AuthService {
   }
 
   async signIn(user: SignInPayload): Promise<AuthResult> {
-    const payload = {
+    const accessPayload = {
       sub: user.userId,
+      type: 'user',
+    };
+    const refreshPayload = {
+      sub: user.userId,
+      type: 'user',
     };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
+    const accessToken = await this.jwtService.signAsync(accessPayload, {
       secret: this.configService.get<string>('jwt.secret'),
       expiresIn: '1d',
+    });
+    const refreshToken = await this.jwtService.signAsync(refreshPayload, {
+      secret:
+        this.configService.get<string>('jwt.refreshSecret') ||
+        this.configService.get<string>('jwt.secret'),
+      expiresIn: '30d',
     });
 
     return {
       accessToken,
+      refreshToken,
     };
+  }
+
+  async refreshSession(refreshToken: string): Promise<AuthResult> {
+    let decoded: { sub: string; type?: string };
+    try {
+      decoded = await this.jwtService.verifyAsync(refreshToken, {
+        secret:
+          this.configService.get<string>('jwt.refreshSecret') ||
+          this.configService.get<string>('jwt.secret'),
+      });
+    } catch {
+      throw new UnauthorizedException('Refresh token is invalid or expired');
+    }
+
+    if (decoded.type && decoded.type !== 'user') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return this.signIn({ userId: decoded.sub });
   }
 
   async requestPasswordReset(email: string) {

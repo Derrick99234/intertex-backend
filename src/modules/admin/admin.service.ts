@@ -65,7 +65,7 @@ export class AdminService {
   async login(
     email: string,
     password: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const admin = await this.adminModel
       .findOne({ email: email.toLowerCase() })
       .select('+password');
@@ -75,13 +75,50 @@ export class AdminService {
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = { sub: admin._id, role: admin.role };
+    return this.issueTokens(admin._id.toString(), admin.role);
+  }
+
+  async refreshSession(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    let decoded: { sub: string; role?: string; type?: string };
+    try {
+      decoded = await this.jwtService.verifyAsync(refreshToken, {
+        secret:
+          this.configService.get<string>('jwt.refreshSecret') ||
+          this.configService.get<string>('jwt.adminSecret'),
+      });
+    } catch {
+      throw new UnauthorizedException('Refresh token is invalid or expired');
+    }
+
+    if (decoded.type && decoded.type !== 'admin') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const admin = await this.adminModel.findById(decoded.sub).select('+password');
+    if (!admin) {
+      throw new UnauthorizedException('Admin not found');
+    }
+
+    return this.issueTokens(admin._id.toString(), admin.role);
+  }
+
+  private async issueTokens(
+    adminId: string,
+    role: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: adminId, role, type: 'admin' };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.adminSecret'),
       expiresIn: '1d',
     });
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret:
+        this.configService.get<string>('jwt.refreshSecret') ||
+        this.configService.get<string>('jwt.adminSecret'),
+      expiresIn: '30d',
+    });
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   async findOne(id: string): Promise<Admin> {

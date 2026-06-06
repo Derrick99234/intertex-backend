@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  HttpCode,
   Res,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminAuthGuard } from '../auth/guard/admin.guard';
@@ -36,14 +38,49 @@ export class AdminController {
   @Post('login')
   async login(@Body() loginDto: AdminLoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.adminService.login(loginDto.email, loginDto.password);
-    res.cookie('adminToken', result.accessToken, {
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    return result;
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.adminRefreshToken;
+    const result = await this.adminService.refreshSession(refreshToken);
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    return result;
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('adminToken', { path: '/' });
+    res.clearCookie('adminRefreshToken', { path: '/' });
+    return { message: 'Logged out successfully' };
+  }
+
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    res.cookie('adminToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     });
-    return result;
+    res.cookie('adminRefreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
   }
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
