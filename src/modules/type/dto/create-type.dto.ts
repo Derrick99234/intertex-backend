@@ -19,8 +19,8 @@ export class CreateTypeDto {
   @IsString()
   slug?: string;
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   status?: boolean;
 
   @IsNotEmpty()

@@ -1,17 +1,21 @@
 import {
   IsBoolean,
+  IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 
 export class CreateBillingInformationDto {
   @IsString()
+  @IsNotEmpty()
   deliveryAddress: string;
 
   @IsString()
+  @IsNotEmpty()
   country: string;
 
   @IsString()
+  @IsNotEmpty()
   state: string;
 
   @IsOptional()
@@ -23,9 +27,11 @@ export class CreateBillingInformationDto {
   secondPhoneNumber?: string;
 
   @IsString()
+  @IsNotEmpty()
   phoneNumber: string;
 
   @IsString()
+  @IsNotEmpty()
   fullName: string;
 
   @IsOptional()

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -88,11 +88,17 @@ export class OrdersService {
     return order;
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
-    const order = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, {
+  async update(id: string, updateOrderDto: UpdateOrderDto, currentUser?: string): Promise<Order> {
+    const order = await this.orderModel.findById(id);
+    if (!order) throw new NotFoundException('Order not found');
+
+    if (currentUser && order.userId.toString() !== currentUser) {
+      throw new ForbiddenException('You do not own this order');
+    }
+
+    const updated = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, {
       new: true,
     });
-    if (!order) throw new NotFoundException('Order not found');
-    return this.findOne(order._id.toString());
+    return this.findOne(updated._id.toString());
   }
 }

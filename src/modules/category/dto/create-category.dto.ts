@@ -13,6 +13,7 @@ export class CreateCategoryDto {
   @IsString()
   slug?: string;
 
+  @IsOptional()
   @IsBoolean()
   status: boolean;
 }

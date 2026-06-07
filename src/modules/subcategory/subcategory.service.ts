@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
@@ -15,9 +15,16 @@ export class SubcategoryService {
   ) {}
 
   async create(createDto: CreateSubcategoryDto): Promise<Subcategory> {
-    await this.categoryService.findOne(createDto.category);
-    const subcategory = new this.subcategoryModel(createDto);
-    return subcategory.save();
+    try {
+      await this.categoryService.findOne(createDto.category);
+      const subcategory = new this.subcategoryModel(createDto);
+      return subcategory.save();
+    } catch (error: any) {
+      if (error.code === 11000) {
+        throw new ConflictException('Category slug already exists');
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<Subcategory[]> {

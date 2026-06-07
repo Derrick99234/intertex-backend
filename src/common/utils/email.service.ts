@@ -63,6 +63,7 @@ export class EmailService {
       this.logger.log(`Email sent to ${options.to}`);
     } catch (error) {
       this.logger.error(`Failed to send email to ${options.to}`, error);
+      throw error;
     }
   }
 

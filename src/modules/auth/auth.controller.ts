@@ -12,11 +12,17 @@ import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     await this.authService.createUser(createUserDto);
@@ -29,10 +35,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
-    @Body() body: { email: string; password: string },
+    @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.authenticate(body);
+    const result = await this.authService.authenticate(loginDto);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
     return result;
   }
@@ -82,29 +88,29 @@ export class AuthController {
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('password-reset/request')
-  async requestPasswordReset(@Body() body: { email: string }) {
-    return this.authService.requestPasswordReset(body.email);
+  async requestPasswordReset(@Body() passwordResetRequestDto: PasswordResetRequestDto) {
+    return this.authService.requestPasswordReset(passwordResetRequestDto.email);
   }
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('password-reset/resend-otp')
-  async resendPasswordResetOtp(@Body() body: { email: string }) {
-    return this.authService.resendPasswordResetOtp(body.email);
+  async resendPasswordResetOtp(@Body() resendOtpDto: ResendOtpDto) {
+    return this.authService.resendPasswordResetOtp(resendOtpDto.email);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('password-reset/verify-otp')
-  async verifyPasswordResetOtp(@Body() body: { email: string; otp: string }) {
-    return this.authService.verifyPasswordResetOtp(body.email, body.otp);
+  async verifyPasswordResetOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyPasswordResetOtp(verifyOtpDto.email, verifyOtpDto.otp);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('reset-password')
-  async resetPassword(@Body() body: { token: string; newPassword: string }) {
-    return this.authService.resetPassword(body.token, body.newPassword);
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })

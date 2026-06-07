@@ -1,7 +1,8 @@
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateBlogPostDto {
   @IsString()
+  @IsNotEmpty()
   title: string;
 
   @IsOptional()
@@ -9,6 +10,7 @@ export class CreateBlogPostDto {
   tags?: string[];
 
   @IsString()
+  @IsNotEmpty()
   content: string;
 
   @IsOptional()
