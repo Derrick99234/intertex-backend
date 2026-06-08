@@ -21,6 +21,7 @@ export class TypeService {
     @InjectModel(ProductType.name)
     private typeModel: Model<ProductType>,
     private categoryService: CategoryService,
+    @Inject(forwardRef(() => ProductService))
     private productService: ProductService,
     private subcategoryService: SubcategoryService,
     private orderService: OrdersService,

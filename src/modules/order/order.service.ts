@@ -36,13 +36,15 @@ export class OrdersService {
     });
     const savedOrder = await order.save();
 
-    for (const update of products) {
-      await this.cartService.removeItem(
-        userId,
-        update.product.toString(),
-        update.size,
-      );
-    }
+    await Promise.allSettled(
+      products.map((update) =>
+        this.cartService.removeItem(
+          userId,
+          update.product.toString(),
+          update.size,
+        ),
+      ),
+    );
 
     return this.findOne(savedOrder._id.toString());
   }

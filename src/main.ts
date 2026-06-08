@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { MongooseExceptionFilter } from './common/decorators/mongoose-exception.decorator';
+import { ConfigService } from '@nestjs/config';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
   app.use(cookieParser());
   app.use(
     helmet({
@@ -24,9 +27,11 @@ async function bootstrap() {
       },
     }),
   );
+
+  const corsOrigin = configService.get<string>('cors.origin');
   app.enableCors({
-    origin: process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+    origin: corsOrigin
+      ? corsOrigin.split(',').map((origin) => origin.trim())
       : process.env.NODE_ENV === 'production'
         ? 'https://intertex.vercel.app'
         : true,
@@ -39,12 +44,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.useGlobalFilters(new MongooseExceptionFilter());
-  // const adminService = app.get(AdminService);
-  // await adminService.createSuperAdmin();
-
-  // const userService = app.get(UserService);
-  // await userService.generateFakeUsers(100);
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

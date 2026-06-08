@@ -13,7 +13,7 @@ import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
 import * as AWS from 'aws-sdk';
-import { PaginationQuery, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
+import { PaginationQuery, PaginatedResult, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
 
 @Injectable()
 export class ProductService {
@@ -243,19 +243,17 @@ export class ProductService {
       page?: number;
       limit?: number;
     },
-  ): Promise<Product[]> {
-    // Case-insensitive partial match for keyword
+  ): Promise<PaginatedResult<Product>> {
     const keywordRegex =
       keyword && keyword.trim().length > 0
         ? new RegExp(keyword.trim(), 'i')
         : /.*/;
 
-    // Base query
     const filterQuery: any = {
       $or: [{ productName: keywordRegex }, { description: keywordRegex }],
     };
 
-    let sortQuery: any = { createdAt: -1 }; // default → newest
+    let sortQuery: any = { createdAt: -1 };
 
     switch (filters?.sort) {
       case 'price_asc':
@@ -270,7 +268,7 @@ export class ProductService {
       default:
         sortQuery = { createdAt: -1 };
     }
-    // ✅ Category filter
+
     if (filters?.categorySlug && filters.categorySlug.trim()) {
       const category = await this.categoryService.findOneBySlug(
         filters.categorySlug,
@@ -284,7 +282,6 @@ export class ProductService {
       }
     }
 
-    // ✅ Subcategory filter
     if (filters?.subcategorySlug && filters.subcategorySlug.trim()) {
       const subcategory = await this.subcategoryService.findOneBySlug(
         filters.subcategorySlug,
@@ -297,7 +294,6 @@ export class ProductService {
       filterQuery.subcategory = subcategory._id;
     }
 
-    // ✅ Product type filter
     if (filters?.productTypeSlug && filters.productTypeSlug.trim()) {
       const productType = await this.typeService.findOneBySlug(
         filters.productTypeSlug,
@@ -310,7 +306,6 @@ export class ProductService {
       filterQuery.productType = productType._id;
     }
 
-    // ✅ Price range filter
     const minPriceValid =
       filters?.minPrice !== undefined && !isNaN(filters.minPrice);
     const maxPriceValid =
@@ -322,29 +317,30 @@ export class ProductService {
       if (maxPriceValid) filterQuery.price.$lte = filters!.maxPrice;
     }
 
-    // 🧠 Debugging logs
-
-    // Fetch results
     const { page, limit, skip } = parsePagination(
       { page: filters?.page, limit: filters?.limit },
       12,
     );
-    const results = await this.productModel
-      .find(filterQuery)
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limit)
-      .populate({
-        path: 'subcategory',
-        populate: {
-          path: 'category',
-          model: 'Category',
-          select: 'name slug',
-        },
-      })
-      .populate('productType');
 
-    return results;
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find(filterQuery)
+        .sort(sortQuery)
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'subcategory',
+          populate: {
+            path: 'category',
+            model: 'Category',
+            select: 'name slug',
+          },
+        })
+        .populate('productType'),
+      this.productModel.countDocuments(filterQuery),
+    ]);
+
+    return paginatedResult(data, total, page, limit);
   }
 
   async fetchLatestProducts(limit: number): Promise<Product[]> {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -20,6 +20,7 @@ import { PaystackModule } from './modules/paystack/paystack.module';
 import { OrdersModule } from './modules/order/order.module';
 import { HealthModule } from './modules/health/health.module';
 import { PlatformLoginModule } from './modules/platform-login/platform-login.module';
+import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 
 @Module({
   imports: [
@@ -63,4 +64,8 @@ import { PlatformLoginModule } from './modules/platform-login/platform-login.mod
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CsrfMiddleware).forRoutes('*');
+  }
+}

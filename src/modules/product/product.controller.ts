@@ -107,8 +107,7 @@ export class ProductController {
       limit,
     };
 
-    const products = await this.productService.searchProducts(keyword, filters);
-    return { products };
+    return this.productService.searchProducts(keyword, filters);
   }
 
   @Get(':id')
