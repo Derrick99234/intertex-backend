@@ -39,7 +39,7 @@ export class AdminController {
   async login(@Body() loginDto: AdminLoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.adminService.login(loginDto.email, loginDto.password);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return result;
+    return { message: 'Login successful' };
   }
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -51,7 +51,7 @@ export class AdminController {
     const refreshToken = req.cookies?.adminRefreshToken;
     const result = await this.adminService.refreshSession(refreshToken);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return result;
+    return { message: 'Token refreshed' };
   }
 
   @Post('logout')

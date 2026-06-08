@@ -40,7 +40,7 @@ export class AuthController {
   ) {
     const result = await this.authService.authenticate(loginDto);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return result;
+    return { message: 'Login successful' };
   }
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -53,7 +53,7 @@ export class AuthController {
     const refreshToken = req.cookies?.refreshToken;
     const result = await this.authService.refreshSession(refreshToken);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return result;
+    return { message: 'Token refreshed' };
   }
 
   @HttpCode(HttpStatus.OK)
