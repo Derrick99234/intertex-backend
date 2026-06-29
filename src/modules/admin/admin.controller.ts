@@ -57,8 +57,16 @@ export class AdminController {
   @Post('logout')
   @HttpCode(200)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('adminToken', { path: '/' });
-    res.clearCookie('adminRefreshToken', { path: '/' });
+    res.clearCookie('adminToken', {
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+    });
+    res.clearCookie('adminRefreshToken', {
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+    });
     return { message: 'Logged out successfully' };
   }
 
@@ -70,14 +78,14 @@ export class AdminController {
     res.cookie('adminToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     });
     res.cookie('adminRefreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });

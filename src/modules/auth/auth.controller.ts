@@ -59,8 +59,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('token', { path: '/' });
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('token', {
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+    });
+    res.clearCookie('refreshToken', {
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+    });
     return { message: 'Logged out successfully' };
   }
 
@@ -72,14 +80,14 @@ export class AuthController {
     res.cookie('token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });
