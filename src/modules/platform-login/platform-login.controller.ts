@@ -28,6 +28,6 @@ export class PlatformLoginController {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });
-    return { message: 'Login successful' };
+    return { message: 'Login successful', accessToken: result.accessToken };
   }
 }

@@ -24,10 +24,16 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    await this.authService.createUser(createUserDto);
+  async register(
+    @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.authService.createUser(createUserDto);
+    const result = await this.authService.signIn({ userId: user._id.toString() });
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
     return {
       message: 'User created successfully',
+      accessToken: result.accessToken,
     };
   }
 
@@ -40,7 +46,7 @@ export class AuthController {
   ) {
     const result = await this.authService.authenticate(loginDto);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return { message: 'Login successful' };
+    return { message: 'Login successful', accessToken: result.accessToken };
   }
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -53,7 +59,7 @@ export class AuthController {
     const refreshToken = req.cookies?.refreshToken;
     const result = await this.authService.refreshSession(refreshToken);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return { message: 'Token refreshed' };
+    return { message: 'Token refreshed', accessToken: result.accessToken };
   }
 
   @HttpCode(HttpStatus.OK)
