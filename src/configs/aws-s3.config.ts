@@ -1,4 +1,4 @@
-import * as AWS from 'aws-sdk';
+import { S3Client } from '@aws-sdk/client-s3';
 import * as multer from 'multer';
 import * as multerS3 from 'multer-s3';
 
@@ -11,7 +11,7 @@ const canUseS3 =
   !!bucket;
 
 const s3 = canUseS3
-  ? new AWS.S3({
+  ? new S3Client({
       region,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,

@@ -12,7 +12,7 @@ import { TypeService } from '../type/type.service';
 import { Product } from '../../schemas/product.schema';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { CategoryService } from '../category/category.service';
-import * as AWS from 'aws-sdk';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { PaginationQuery, PaginatedResult, parsePagination, paginatedResult } from '../../common/utils/pagination.util';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class ProductService {
 
   private readonly s3 =
     process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-      ? new AWS.S3({
+      ? new S3Client({
           region: process.env.AWS_REGION || 'eu-north-1',
           credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -54,13 +54,8 @@ export class ProductService {
     const Key = this.extractKeyFromUrl(url);
 
     try {
-      await this.s3
-        .deleteObject({
-          Bucket,
-          Key,
-        })
-        .promise();
-    } catch (error) {
+      await this.s3.send(new DeleteObjectCommand({ Bucket, Key }));
+    } catch {
       throw new Error('Failed to delete file');
     }
   }
