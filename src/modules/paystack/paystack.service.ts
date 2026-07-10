@@ -11,9 +11,11 @@ export class PaystackService {
     email: string,
     amount: number,
     metadata: Record<string, any>,
+    callbackUrl?: string,
   ) {
     const secretKey = this.configService.get<string>('paystack.secretKey');
-    const callbackUrl =
+    const resolvedCallbackUrl =
+      callbackUrl ||
       this.configService.get<string>('paystack.callbackUrl') ||
       'https://intertex.vercel.app/payment-success';
 
@@ -37,7 +39,7 @@ export class PaystackService {
           email,
           amount,
           metadata,
-          callback_url: callbackUrl,
+          callback_url: resolvedCallbackUrl,
         },
         {
           headers: {

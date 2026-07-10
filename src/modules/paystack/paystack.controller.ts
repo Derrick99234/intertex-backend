@@ -16,10 +16,10 @@ export class PaystackController {
       body.email,
       body.amount,
       body.metadata,
+      body.callback_url,
     );
   }
 
-  @UseGuards(AuthGuard)
   @Get('verify')
   async verify(@Query('reference') reference: string) {
     return this.paystackService.verifyTransaction(reference);

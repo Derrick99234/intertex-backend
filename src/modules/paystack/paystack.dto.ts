@@ -16,4 +16,8 @@ export class PaystackInitializeDto {
   @IsString()
   @IsOptional()
   currency?: string;
+
+  @IsString()
+  @IsOptional()
+  callback_url?: string;
 }
