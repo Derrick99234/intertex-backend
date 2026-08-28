@@ -29,12 +29,18 @@ async function bootstrap() {
   );
 
   const corsOrigin = configService.get<string>('cors.origin');
+  const defaultOrigins =
+    process.env.NODE_ENV === 'production'
+      ? [
+          'https://intertexng.shop',
+          'https://www.intertexng.shop',
+          'https://intertex.vercel.app',
+        ]
+      : true;
   app.enableCors({
     origin: corsOrigin
       ? corsOrigin.split(',').map((origin) => origin.trim())
-      : process.env.NODE_ENV === 'production'
-        ? 'https://intertex.vercel.app'
-        : true,
+      : defaultOrigins,
     credentials: true,
   });
   app.useGlobalPipes(
