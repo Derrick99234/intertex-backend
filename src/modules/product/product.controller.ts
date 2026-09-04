@@ -246,6 +246,10 @@ export class ProductController {
         .split(',')
         .map((image: string) => image.trim())
         .filter(Boolean);
+    } else if (Array.isArray(body.deleteImages)) {
+      normalized.deleteImages = body.deleteImages
+        .map((image: any) => String(image).trim())
+        .filter(Boolean);
     }
 
     return normalized;
