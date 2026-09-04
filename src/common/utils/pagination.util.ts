@@ -1,6 +1,7 @@
 export interface PaginationQuery {
   page?: number;
   limit?: number;
+  all?: boolean | string;
 }
 
 export interface PaginatedResult<T> {
@@ -11,11 +12,18 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-export function parsePagination(query: PaginationQuery, defaultLimit = 12) {
-  const page = Math.max(1, query.page || 1);
-  const limit = Math.min(100, Math.max(1, query.limit || defaultLimit));
-  const skip = (page - 1) * limit;
-  return { page, limit, skip };
+export function parsePagination(query: PaginationQuery = {}, defaultLimit = 12) {
+  const isAll = query.all === true || String(query.all) === 'true';
+  const page = Math.max(1, Number(query.page) || 1);
+  const parsedLimit = Number(query.limit);
+  const limit = isAll
+    ? 10000
+    : Math.min(
+        10000,
+        Math.max(1, !isNaN(parsedLimit) && parsedLimit > 0 ? parsedLimit : defaultLimit),
+      );
+  const skip = isAll ? 0 : (page - 1) * limit;
+  return { page, limit, skip, isAll };
 }
 
 export function paginatedResult<T>(
