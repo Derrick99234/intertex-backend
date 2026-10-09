@@ -25,7 +25,7 @@ export class Product extends Document {
   @Prop({ type: [SizeQuantitySchema], default: [] })
   inStock: SizeQuantity[];
 
-  @Prop({ required: true })
+  @Prop({ default: '', required: false })
   offer: string;
 
   @Prop({ required: true })

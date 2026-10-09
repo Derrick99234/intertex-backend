@@ -79,8 +79,23 @@ export class ProductService {
     await this.typeService.findOne(productType);
     await this.subcategoryService.findOne(subcategory);
 
+    let baseSlug = (createProductDto.productName || 'product')
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    let slug = baseSlug;
+    let count = 1;
+    while (await this.productModel.findOne({ slug })) {
+      slug = `${baseSlug}-${count}`;
+      count++;
+    }
+
     const newProduct = new this.productModel({
       ...createProductDto,
+      slug,
       imageUrl,
       otherImages,
     });
@@ -178,40 +193,71 @@ export class ProductService {
       await this.subcategoryService.findOne(updateProductDto.subcategory);
     }
 
-    const mergedOtherImages = [
-      ...(product.otherImages || []),
-      ...(updateProductDto.otherImages || []),
-      ...(newImages || []),
-    ];
-
-    const updated = await this.productModel
-      .findByIdAndUpdate(
-        id,
-        {
-          ...updateProductDto,
-          ...(imageUrl ? { imageUrl } : {}),
-          otherImages: mergedOtherImages,
-        },
-        { new: true },
-      )
-      .populate('productType');
-
-    if (!updated) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+    let updatedSlug = product.slug;
+    if (
+      updateProductDto.productName &&
+      updateProductDto.productName !== product.productName
+    ) {
+      let baseSlug = updateProductDto.productName
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      let slug = baseSlug;
+      let count = 1;
+      while (await this.productModel.findOne({ slug, _id: { $ne: id } })) {
+        slug = `${baseSlug}-${count}`;
+        count++;
+      }
+      updatedSlug = slug;
     }
 
+    let currentOtherImages = product.otherImages || [];
     if (
       updateProductDto.deleteImages &&
       updateProductDto.deleteImages.length > 0
     ) {
-      updated.otherImages = updated.otherImages.filter(
+      currentOtherImages = currentOtherImages.filter(
         (img) => !updateProductDto.deleteImages.includes(img),
       );
 
-      // Call AWS S3 to delete the images from the bucket
-      await this.deleteFilesFromUrls(updateProductDto.deleteImages);
+      try {
+        await this.deleteFilesFromUrls(updateProductDto.deleteImages);
+      } catch (err) {
+        console.error('Failed to delete images from S3:', err);
+      }
+    }
 
-      await updated.save();
+    const mergedOtherImages = [
+      ...currentOtherImages,
+      ...(newImages || []),
+    ];
+
+    const updatePayload: Record<string, any> = {
+      ...updateProductDto,
+      slug: updatedSlug,
+      otherImages: mergedOtherImages,
+    };
+    if (imageUrl) {
+      updatePayload.imageUrl = imageUrl;
+    }
+    delete updatePayload.deleteImages;
+
+    const updated = await this.productModel
+      .findByIdAndUpdate(id, updatePayload, { new: true })
+      .populate({
+        path: 'subcategory',
+        populate: {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      })
+      .populate('productType');
+
+    if (!updated) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
     return updated;

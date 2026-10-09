@@ -56,14 +56,17 @@ export class ProductController {
 
     const resolvedImageUrl =
       files.imageUrl?.[0]?.location ||
+      files.imageUrl?.[0]?.path ||
       createProductDto.imageUrl ||
+      files.otherImages?.[0]?.location ||
+      files.otherImages?.[0]?.path ||
       undefined;
     if (!resolvedImageUrl) {
       throw new BadRequestException('Main product image is required');
     }
 
     const otherImages = [
-      ...(files.otherImages?.map((f) => f.location).filter(Boolean) || []),
+      ...(files.otherImages?.map((f) => f.location || f.path).filter(Boolean) || []),
       ...((createProductDto.otherImages || []).filter(Boolean) as string[]),
     ];
 
@@ -143,9 +146,13 @@ export class ProductController {
       UpdateProductDto,
       this.normalizeProductBody(body),
     );
-    const newImages = files.otherImages?.map((f) => f.location) || [];
+    const newImages =
+      files.otherImages?.map((f) => f.location || f.path).filter(Boolean) || [];
     const imageUrl =
-      files.imageUrl?.[0]?.location || updateProductDto.imageUrl || undefined;
+      files.imageUrl?.[0]?.location ||
+      files.imageUrl?.[0]?.path ||
+      updateProductDto.imageUrl ||
+      undefined;
 
     const product = await this.productService.update(
       id,
@@ -250,6 +257,10 @@ export class ProductController {
       normalized.deleteImages = body.deleteImages
         .map((image: any) => String(image).trim())
         .filter(Boolean);
+    }
+
+    if (normalized.offer === undefined || normalized.offer === null) {
+      normalized.offer = '';
     }
 
     return normalized;
