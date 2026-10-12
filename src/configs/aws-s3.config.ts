@@ -2,8 +2,12 @@ import { S3Client } from '@aws-sdk/client-s3';
 import * as multer from 'multer';
 import * as multerS3 from 'multer-s3';
 
-const region = process.env.AWS_REGION || 'eu-north-1';
 const bucket = process.env.AWS_BUCKET_NAME || 'intertex-storage';
+// intertex-storage bucket is located in Stockholm (eu-north-1)
+const region =
+  bucket === 'intertex-storage'
+    ? 'eu-north-1'
+    : process.env.AWS_REGION || 'eu-north-1';
 
 const canUseS3 =
   !!process.env.AWS_ACCESS_KEY_ID &&

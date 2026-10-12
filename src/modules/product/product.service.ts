@@ -28,7 +28,11 @@ export class ProductService {
   private readonly s3 =
     process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
       ? new S3Client({
-          region: process.env.AWS_REGION || 'eu-north-1',
+          region:
+            (process.env.AWS_BUCKET_NAME || 'intertex-storage') ===
+            'intertex-storage'
+              ? 'eu-north-1'
+              : process.env.AWS_REGION || 'eu-north-1',
           credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
